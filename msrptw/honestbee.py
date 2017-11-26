@@ -80,7 +80,7 @@ class HonestBee(Directory):
                 if unit_type == 'unit_type_item':
                     weight = weight * float(amount_str)
 
-                origin = Directory.get_origin(name, default='臺灣')
+                origin = Directory.get_origin(name, default='其他')
 
             except:
                 d = {
