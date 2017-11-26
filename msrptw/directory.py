@@ -66,7 +66,7 @@ class Directory(object):
     ''', re.X)
 
     MULTI_RE = re.compile('''
-        (?:[*×][0-9]+)
+        (?:[*×xX][0-9]+)|(?:[0-9]+[*×xX])
     ''', re.X)
 
     STACK = []
@@ -120,6 +120,8 @@ class Directory(object):
 
     @staticmethod
     def get_origin(origin_str, default='其他'):
+
+        origin_str = Directory.normalize(origin_str)
 
         def find(s):
             for key in Directory.ORIGIN_MAP.keys():

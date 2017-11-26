@@ -177,7 +177,14 @@ def init():
             Part(name='木耳'),
             Part(name='奇亞籽'),
             Part(name='柴魚'),
-            Part(name='海帶芽')
+            Part(name='海帶芽'),
+            Part(name='海苔'),
+            Part(name='蝦仁', aliases=[
+                Alias(name='櫻花蝦')
+            ]),
+            Part(name='乾金針', aliases=[
+                Alias(name='金針')
+            ])
         ]
 
         veg = Config(name='蔬菜')
@@ -234,7 +241,9 @@ def init():
             Part(name='茭白筍', aliases=[
                 Alias(name='筊白筍')
             ]),
-            Part(name='芹菜'),
+            Part(name='芹菜', aliases=[
+                Alias(name='西芹')
+            ]),
             Part(name='甜椒', aliases=[
                 Alias(name='青椒'),
                 Alias(name='彩椒')
@@ -305,7 +314,9 @@ def init():
                 Alias(name='山苦瓜')
             ]),
             Part(name='牛蕃茄', aliases=[
-                Alias(name='牛番茄')
+                Alias(name='牛番茄'),
+                Alias(name='蕃茄'),
+                Alias(name='番茄')
             ]),
             Part(name='山藥'),
             Part(name='花椰菜', aliases=[
@@ -383,7 +394,8 @@ def init():
             Part(name='山蘇'),
             Part(name='紅鳳菜'),
             Part(name='皇帝菜'),
-            Part(name='廣島菜')
+            Part(name='廣島菜'),
+            Part(name='竹筍')
         ]
 
         fruit = Config(name='水果')
@@ -445,6 +457,7 @@ def init():
                 Alias(name='紫米'),
                 Alias(name='香米'),
                 Alias(name='胚芽米'),
+                Alias(name='穀米'),
                 Alias(name='玉米', anti=True)
             ]),
             Part(name='罐頭', aliases=[
@@ -483,7 +496,9 @@ def init():
                 Alias(name='通心'),
                 Alias(name='炊粉'),
                 Alias(name='粄條'),
-                Alias(name='水粉')
+                Alias(name='水粉'),
+                Alias(name='粉絲'),
+                Alias(name='寬粉')
             ])
         ]
 

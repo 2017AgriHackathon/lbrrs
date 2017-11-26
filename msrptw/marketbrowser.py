@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import abc
 import requests
 import re
+import json
 import logging
 import urllib.parse as urlparse
 from lxml import html
@@ -427,6 +429,26 @@ class RtmartBrowser(MarketBrowser):
         price = Price(price=price, date=self.date)
 
         return product, price
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
