@@ -4,7 +4,6 @@ from __future__ import print_function
 import abc
 import requests
 import re
-import json
 import logging
 import urllib.parse as urlparse
 from lxml import html
@@ -149,6 +148,9 @@ class WellcomeBrowser(MarketBrowser):
             # '$69' => 69
             price = int(price_str)
 
+            # try to find unit in spec and title
+            unit = self.get_unit(name_str + spec_str)
+
         except:
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
@@ -159,7 +161,8 @@ class WellcomeBrowser(MarketBrowser):
                           market_id=self.market.id,
                           pid=pid,
                           weight=weight,
-                          count=count)
+                          count=count,
+                          unit=unit)
 
         price = Price(price=price, date=self.date)
 
@@ -221,6 +224,8 @@ class GeantBrowser(MarketBrowser):
 
         content_origin_str = xpath(page, '//div[@class="product_content"]//tr[contains(string(), "產地")]/td[2]//text()')
 
+        content_unit_str = xpath(page, '//div[@class="product_content"]//tr[contains(string(), "數量")]/td[2]//text()')
+
         price_str = xpath(page, '//dd[@class="list_price"]/text()')
 
         try:
@@ -266,6 +271,16 @@ class GeantBrowser(MarketBrowser):
 
             price = int(price_str)
 
+            # try to find unit in title, introduction, content table
+            try:
+                unit_str = GeantBrowser.COUNT_RE.findall(intro_str)[0]
+                unit_str += name_str
+                unit_str += content_unit_str
+            except IndexError:
+                unit_str = name_str + content_unit_str
+
+            unit = self.get_unit(unit_str)
+
         except:
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
@@ -276,7 +291,8 @@ class GeantBrowser(MarketBrowser):
                           market_id=self.market.id,
                           pid=pid,
                           weight=weight,
-                          count=count)
+                          count=count,
+                          unit=unit)
 
         price = Price(price=price, date=self.date)
 
@@ -318,6 +334,10 @@ class FengKangBrowser(MarketBrowser):
         (?<=產　　地：)(.*)
     ''', re.X)
 
+    UNIT_RE = re.compile('''
+        (?<=包　　裝：)(.*)
+    ''', re.X)
+
     def __init__(self):
         super(FengKangBrowser, self).__init__()
 
@@ -339,6 +359,8 @@ class FengKangBrowser(MarketBrowser):
         price_str = xpath(page, '//div[@class="vw"]/div[@class="tt23"]//h4/text()')
 
         origin_str = xpath(page, '//div[@id="tab1"]/div[contains(string(), "產　　地：")]/text()')
+
+        unit_str = xpath(page, '//div[@id="tab1"]/div[contains(string(), "包　　裝：")]/text()')
 
         try:
             # 胡蘿蔔/約500g => 胡蘿蔔
@@ -364,6 +386,9 @@ class FengKangBrowser(MarketBrowser):
 
             price = int(price_str)
 
+            # try to find unit in title and introduction
+            unit = self.get_unit(name_str + unit_str)
+
         except:
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
@@ -374,7 +399,8 @@ class FengKangBrowser(MarketBrowser):
                           market_id=self.market.id,
                           pid=pid,
                           weight=weight,
-                          count=count)
+                          count=count,
+                          unit=unit)
 
         price = Price(price=price, date=self.date)
 
@@ -476,6 +502,9 @@ class RtmartBrowser(MarketBrowser):
             price_str = Directory.NUM_RE.findall(price_str)[0]
             price = int(price_str)
 
+            # try to find unit in title, introduction
+            unit = self.get_unit(name_str + intro_str)
+
         except:
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
@@ -484,7 +513,9 @@ class RtmartBrowser(MarketBrowser):
                           name=name, origin=origin,
                           market_id=self.market.id,
                           pid=pid,
-                          weight=weight)
+                          weight=weight,
+                          count=count,
+                          unit=unit)
 
         price = Price(price=price, date=self.date)
 

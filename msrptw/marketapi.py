@@ -131,7 +131,7 @@ class CarrfourBrowser(MarketApi):
 
                 # get origin_str and weight_str from page
                 product_url = self.INDEX_ROUTE + origin_route
-                origin_str, weight_str = self.get_infos(product_url)
+                origin_str, weight_str, unit_str = self.get_infos(product_url)
                 origin = Directory.get_origin(origin_str, default='其他')
 
                 if weight_str:
@@ -139,6 +139,8 @@ class CarrfourBrowser(MarketApi):
                 # try to find weight in title
                 else:
                     weight = self.get_weight(name_str)
+
+                unit = self.get_unit(unit_str)
 
                 count = int(count_str)
 
@@ -160,7 +162,8 @@ class CarrfourBrowser(MarketApi):
                               pid=pid,
                               origin=origin,
                               weight=weight,
-                              count=count)
+                              count=count,
+                              unit=unit)
 
             return product, price
 
@@ -195,7 +198,11 @@ class CarrfourBrowser(MarketApi):
             //div[@id="pro-content2"]//div[contains(string(), "重量")]/following-sibling::div[1]/text()
         ''')
 
-        return origin_str, weight_str
+        unit_str = xpath(page, '''
+            //div[@id="pro-content2"]//div[contains(string(), "容量")]/following-sibling::div[1]/text()
+        ''')
+
+        return origin_str, weight_str, unit_str
 
 
 class HonestBee(MarketApi):
@@ -246,7 +253,7 @@ class HonestBee(MarketApi):
                 name = self.normalize(name_str)
                 weight_str = self.normalize(size_str)
                 price = float(price_str)
-                count = int(count_str)
+                count = float(count_str)
 
                 # try to find weight in size key
                 weight = Directory.get_weight(weight_str)

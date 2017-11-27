@@ -8,7 +8,7 @@ from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
 from . import _logging_config_path
 from .database.config import session_scope
-from .database.model import Market, Product, Config, Origin, Price, Part
+from .database.model import Market, Product, Config, Origin, Price, Part, Unit
 
 fileConfig(_logging_config_path)
 log = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class Directory(object):
         |
         (?:[0-9]+[*×xX])
         |
-        (?:[0-9]+)(?=[袋包粒顆盒入]) 
+        (?:[0-9]+)(?=[片粒顆支條包袋盒瓶罐入]) 
     ''', re.X)
 
     STACK = []
@@ -104,6 +104,7 @@ class Directory(object):
             self.configs = session.query(Config).options(
                 subqueryload(Config.parts).subqueryload(Part.aliases)
             ).all()
+            self.units = session.query(Unit).order_by(Unit.level.desc()).all()
             self.market = session.query(Market).filter(Market.name == self.NAME).first()
             session.expunge_all()
 
@@ -143,6 +144,14 @@ class Directory(object):
             session.expunge(origin)
 
         return origin
+
+    def get_unit(self, unit_str):
+
+        for unit in self.units:
+            if unit.name in unit_str:
+                return unit
+
+        return None
 
     @classmethod
     def clear_stack(cls):
