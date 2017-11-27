@@ -100,7 +100,7 @@ class WellcomeBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-            (.*?)[\d\W]
+            (?:.+?)(?=[\d])
     ''', re.X)
 
     def __init__(self):
