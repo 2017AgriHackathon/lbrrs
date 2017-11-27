@@ -190,7 +190,8 @@ def init():
             Part(name='乾金針', aliases=[
                 Alias(name='金針')
             ]),
-            Part(name='紫菜')
+            Part(name='紫菜'),
+            Part(name='小魚乾')
         ]
 
         veg = Config(name='蔬菜')
@@ -653,7 +654,6 @@ def init():
         session.add(kr)
         session.add(other)
 
-        u11 = Unit(name='片', level=1)
         u12 = Unit(name='粒', level=1)
         u13 = Unit(name='顆', level=1)
         u14 = Unit(name='支', level=1)
@@ -666,7 +666,6 @@ def init():
         u23 = Unit(name='盒', level=2)
         u31 = Unit(name='組', level=3)
 
-        session.add(u11)
         session.add(u12)
         session.add(u13)
         session.add(u14)

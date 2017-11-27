@@ -86,12 +86,28 @@ class WellcomeBrowser(MarketBrowser):
 
     NAME = '頂好'
 
-    PRODUCTS_ROUTE = 'https://sbd-ec.wellcome.com.tw/product/listByCategory/%s?max=1000&query=%s'
+    PRODUCTS_ROUTE = 'https://sbd-ec.wellcome.com.tw/product/listByCategory/%s?max=1000&query=%s&sort=viewCount'
     INDEX_ROUTE = 'https://sbd-ec.wellcome.com.tw'
 
+    # 米
+    # 麵
+    # 罐頭 (泡菜、玉米、鳳梨、鮪魚)
+    # 咖哩、粉、香料
+    # 醬
+
+    # 起司、奶油
+    # 牛奶、蛋
+    # 蒟蒻、香腸等、豆腐、糕類
+
     PRODUCT_MAP = {
-        '常溫商品': [(31, 34), (31, 37), (31, 40), (31, 41), (31, 42), (31, 43)],
-        '冷藏商品': [(113, 114), (103, 104), (96, 97), (96, 98), (108, 109), (108, 111)],
+        '常溫商品': [(31, 37),
+                 (31, 40),
+                 (31, 42), (31, 43)
+                 (31, 34),
+                 (33, 41)],
+        '冷藏商品': [(96, 97), (96, 98),
+                 (103, 104), (113, 114),
+                 (108, 109), (108, 110), (108, 111), (108, 112)],
         '海鮮': [(20, 21), (20, 22), (20, 23), (20, 24)],
         '牛肉': [(12, 15), (12, 18)],
         '雞肉': [(12, 13)], '豬肉': [(12, 14), (12, 17)],
