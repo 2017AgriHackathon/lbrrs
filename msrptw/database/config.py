@@ -39,6 +39,7 @@ def init():
             Part(name='雞胸肉', aliases=[
                 Alias(name='清胸'),
                 Alias(name='雞胸'),
+                Alias(name='胸肉')
             ]),
             Part(name='雞里肌肉', aliases=[
                 Alias(name='里肌')
@@ -184,7 +185,8 @@ def init():
             ]),
             Part(name='乾金針', aliases=[
                 Alias(name='金針')
-            ])
+            ]),
+            Part(name='紫菜')
         ]
 
         veg = Config(name='蔬菜')
@@ -279,7 +281,8 @@ def init():
             ]),
             Part(name='芋頭'),
             Part(name='韭菜', aliases=[
-                Alias(name='韭菜花')
+                Alias(name='韭菜花'),
+                Alias(name='韭黃')
             ]),
             Part(name='韭菜花'),
             Part(name='高麗菜', aliases=[
@@ -296,6 +299,7 @@ def init():
                 Alias(name='紫甘藍'),
                 Alias(name='紫色甘藍'),
                 Alias(name='紫高麗菜'),
+                Alias(name='紫色高麗菜')
             ]),
             Part(name='木耳'),
             Part(name='大頭菜'),
@@ -395,7 +399,8 @@ def init():
             Part(name='紅鳳菜'),
             Part(name='皇帝菜'),
             Part(name='廣島菜'),
-            Part(name='竹筍')
+            Part(name='竹筍'),
+            Part(name='蘿美')
         ]
 
         fruit = Config(name='水果')
@@ -442,7 +447,8 @@ def init():
                 Alias(name='哈密瓜'),
                 Alias(name='美濃瓜')
             ]),
-            Part(name='金桔')
+            Part(name='金桔'),
+            Part(name='藍莓')
         ]
 
         normal = Config(name='常溫商品')
@@ -478,6 +484,7 @@ def init():
                 Alias(name='湯塊'),
                 Alias(name='玉米粉'),
                 Alias(name='鬆餅粉'),
+                Alias(name='薑黃粉'),
                 Alias(name='薯粉'),
             ]),
             Part(name='咖哩'),
