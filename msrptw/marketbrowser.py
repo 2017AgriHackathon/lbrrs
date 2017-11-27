@@ -101,7 +101,7 @@ class WellcomeBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-            (.*?)\d
+            (.*?)[\d\W]
     ''', re.X)
 
     def __init__(self):
@@ -115,27 +115,51 @@ class WellcomeBrowser(MarketBrowser):
         return [WellcomeBrowser.INDEX_ROUTE + url for url in set(urls)]
 
     def get_product_price(self, url):
+
         page = MarketBrowser.get_html(url)
-        name_str = ''.join(page.xpath('//div[@class="product-name"]/text()')).strip()
-        weight_str = ''.join(page.xpath('//ul[@class="product-list"]/li[3]/text()')).strip()
-        origin_str = ''.join(page.xpath('//ul[@class="product-list"]/li[2]/text()')).strip()
-        price_str = ''.join(page.xpath('//span[@class="item-price"]/text()')).strip()
+
+        xpath = Directory.flat_xpath
+
+        name_str = xpath(page, '//div[@class="product-name"]/text()')
+
+        spec_str = xpath(page, '//ul[@class="product-list"]/li[3]/text()')
+
+        origin_str = xpath(page, '//ul[@class="product-list"]/li[2]/text()')
+
+        price_str = xpath(page, '//span[@class="item-price"]/text()')
 
         try:
+            # 紅蘿蔔3入/袋 => 紅蘿蔔
             name = WellcomeBrowser.NAME_RE.findall(name_str)[0]
-            weight = self.get_weight(weight_str)
+
+            # 規格摘要：300g => 300
+            weight = self.get_weight(spec_str)
+
+            # 規格摘要: 3入/袋 => 3
+            count = 1
+            if not weight:
+                count = self.get_count(spec_str)
+
+            # product/view/3001 => 3001
             pid = Directory.NUM_RE.findall(url)[-1]
+
+            # 產地：台灣 => Origin(name='臺灣')
             origin = self.get_origin(origin_str)
-            weight = int(weight)
+
+            # '$69' => 69
             price = int(price_str)
+
         except:
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
 
-        product = Product(source=WellcomeBrowser.INDEX_ROUTE,
-                          name=name, origin=origin,
+        product = Product(source=url,
+                          name=name,
+                          origin=origin,
                           market_id=self.market.id,
-                          pid=pid, weight=weight)
+                          pid=pid,
+                          weight=weight,
+                          count=count)
 
         price = Price(price=price, date=self.date)
 
@@ -186,59 +210,73 @@ class GeantBrowser(MarketBrowser):
         return [GeantBrowser.INDEX_ROUTE + url for url in set(urls)]
 
     def get_product_price(self, url):
-        page = MarketBrowser.get_html(url)
-        name_str = ''.join(page.xpath('''
-            //div[@class="product_content"]//tr[contains(string(), "商品")]/td[2]//text()
-        ''')).strip()
-        name_str2 = ''.join(page.xpath('//h3[@class="trade_Name"]/text()')).strip()
-        intro_str = ''.join(page.xpath('//dd[@class="introduction"]/text()')).strip()
-        price_str = ''.join(page.xpath('//dd[@class="list_price"]/text()')).strip()
-        try:
-            name = ''.join([s for s in name_str if s.isalnum()])
-            if not name:
-                name = name_str2
-            name = GeantBrowser.NAME_RE.findall(name)[0]
 
+        page = MarketBrowser.get_html(url)
+
+        xpath = Directory.flat_xpath
+
+        name_str = xpath(page, '//h3[@class="trade_Name"]/text()')
+
+        intro_str = xpath(page, '//dd[@class="introduction"]/text()')
+
+        content_origin_str = xpath(page, '//div[@class="product_content"]//tr[contains(string(), "產地")]/td[2]//text()')
+
+        price_str = xpath(page, '//dd[@class="list_price"]/text()')
+
+        try:
+
+            # 大成去骨雞腿1盒 => 大成去骨雞腿
+            name = GeantBrowser.NAME_RE.findall(name_str)[0]
+
+            # try to find origin in introduction
             try:
                 origin_str = GeantBrowser.ORIGIN_RE.findall(intro_str)[0]
+
+            # try content table, could be ''
             except IndexError:
-                origin_str = ''.join(page.xpath('''
-                    //div[@class="product_content"]//tr[contains(string(), "產地")]/td[2]//text()
-                ''')).strip()
+                origin_str = content_origin_str
 
-            try:
-                count_str = GeantBrowser.COUNT_RE.findall(intro_str)[0]
-                count = Directory.NUM_RE.findall(count_str)[0]
-            except IndexError:
-                count = 1
-
-            try:
-                weight_str = GeantBrowser.WEIGHT_RE.findall(intro_str)[0]
-            except:
-                weight_str = name_str2
-
-            weight = self.get_weight(weight_str)
-            test_weight = self.get_weight(name_str2)
-
-            if test_weight and weight != test_weight:
-                weight = test_weight
-
-            weight = int(weight) * int(count)
-
-            pid = urlparse.parse_qs(url)['pid'][0]
-
-            origin_str = Directory.normalize(origin_str)
             origin = self.get_origin(origin_str)
 
+            # try to find count in introduction
+            try:
+                count_str = GeantBrowser.COUNT_RE.findall(intro_str)[0]
+                count = Directory.get_count(count_str)
+
+            # try to find count in title, or 1
+            except IndexError:
+                count = Directory.get_count(name_str)
+
+            # try to find spec in introduction
+            try:
+                spec_str = GeantBrowser.WEIGHT_RE.findall(intro_str)[0]
+                weight = self.get_weight(spec_str)
+
+                # test weight with title weight
+                test_weight = self.get_weight(name_str)
+                if test_weight and weight != test_weight:
+                    weight = test_weight
+
+            # try to find spec in title
+            except IndexError:
+                weight = self.get_weight(name_str)
+
+            # &pid=4940444 => 4940444
+            pid = urlparse.parse_qs(url)['pid'][0]
+
             price = int(price_str)
+
         except:
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
 
-        product = Product(source=GeantBrowser.INDEX_ROUTE,
-                          name=name, origin=origin,
+        product = Product(source=url,
+                          name=name,
+                          origin=origin,
                           market_id=self.market.id,
-                          pid=pid, weight=weight)
+                          pid=pid,
+                          weight=weight,
+                          count=count)
 
         price = Price(price=price, date=self.date)
 
@@ -280,10 +318,6 @@ class FengKangBrowser(MarketBrowser):
         (?<=產　　地：)(.*)
     ''', re.X)
 
-    COUNT_RE = re.compile('''
-       \*(\d+)(?=[包粒顆盒]) 
-    ''', re.X)
-
     def __init__(self):
         super(FengKangBrowser, self).__init__()
 
@@ -295,41 +329,52 @@ class FengKangBrowser(MarketBrowser):
         return [FengKangBrowser.INDEX_ROUTE + url for url in set(urls)]
 
     def get_product_price(self, url):
+
         page = MarketBrowser.get_html(url)
-        name_weight_str = ''.join(page.xpath('//div[@class="vw"]/div[@class="tt21"]/text()')).strip()
-        price_str = ''.join(page.xpath('//div[@class="vw"]/div[@class="tt23"]//h4/text()')).strip()
-        origin_str = ''.join(page.xpath('//div[@id="tab1"]/div[contains(string(), "產　　地：")]/text()')).strip()
+
+        xpath = Directory.flat_xpath
+
+        name_str = xpath(page, '//div[@class="vw"]/div[@class="tt21"]/text()')
+
+        price_str = xpath(page, '//div[@class="vw"]/div[@class="tt23"]//h4/text()')
+
+        origin_str = xpath(page, '//div[@id="tab1"]/div[contains(string(), "產　　地：")]/text()')
+
         try:
-            name = FengKangBrowser.NAME_RE.findall(name_weight_str)[0]
+            # 胡蘿蔔/約500g => 胡蘿蔔
+            name = FengKangBrowser.NAME_RE.findall(name_str)[0]
 
-            weight = self.get_weight(name_weight_str)
-            weight = int(weight)
+            # try to find weight in title, could be null
+            weight = self.get_weight(name_str)
 
+            # 胡蘿蔔-Shop-6738.html => 6738
             pid = FengKangBrowser.PID_RE.findall(url)[0]
 
-            origin_str = Directory.normalize(origin_str)
+            # try to find origin in introduction
             try:
                 origin_str = FengKangBrowser.ORIGIN_RE.findall(origin_str)[0]
-            except:
-                origin_str = '其他'
+
+            # try to find origin in title
+            except IndexError:
+                origin_str = name_str
+
             origin = self.get_origin(origin_str)
+
+            count = self.get_count(name_str)
 
             price = int(price_str)
 
-            try:
-                count = FengKangBrowser.COUNT_RE.findall(name_weight_str)[0]
-                count = int(count)
-                weight = weight * count
-            except IndexError:
-                pass
         except:
-            log.error(Directory.ERROR_MAP[3] % (name_weight_str, url))
+            log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
 
-        product = Product(source=FengKangBrowser.INDEX_ROUTE,
-                          name=name, origin=origin,
+        product = Product(source=url,
+                          name=name,
+                          origin=origin,
                           market_id=self.market.id,
-                          pid=pid, weight=weight)
+                          pid=pid,
+                          weight=weight,
+                          count=count)
 
         price = Price(price=price, date=self.date)
 
@@ -381,38 +426,52 @@ class RtmartBrowser(MarketBrowser):
         return [url for url in set(urls)]
 
     def get_product_price(self, url):
+
         page = MarketBrowser.get_html(url)
-        name_str = ''.join(page.xpath('//div[@class="pro_rightbox"]/h2[@class="product_Titlename"]/span/text()')).strip()
-        price_str = ''.join(page.xpath('//div[@class="product_PRICEBOX"]//span[@class="price_num"]/text()')).strip()
-        intro_str = ''.join(page.xpath('//table[@class="title_word"]//table/tr/td/text()')).strip()
+
+        xpath = Directory.flat_xpath
+
+        name_str = xpath(page, '//div[@class="pro_rightbox"]/h2[@class="product_Titlename"]/span/text()')
+
+        price_str = xpath(page, '//div[@class="product_PRICEBOX"]//span[@class="price_num"]/text()')
+
+        intro_str = xpath(page, '//table[@class="title_word"]//table/tr/td/text()')
+
         try:
+
+            # 紅蘿蔔約500g => 紅蘿蔔
             name = RtmartBrowser.NAME_RE.findall(name_str)[0]
 
-            intro_str = Directory.normalize(intro_str)
-
+            # try to find spec in introduction
             try:
-                weight_str = RtmartBrowser.WEIGHT_RE.findall(intro_str)[0]
+                spec_str = RtmartBrowser.WEIGHT_RE.findall(intro_str)[0]
+                weight = self.get_weight(spec_str)
+
+                # test spec with weight in title
+                test_weight = self.get_weight(name_str)
+
+                if test_weight and test_weight != weight:
+                    weight = test_weight
+
+            # try to find spec in title
             except IndexError:
-                weight_str = name_str
+                weight = self.get_weight(name_str)
 
-            weight = self.get_weight(weight_str)
-            test_weight = self.get_weight(name_str)
-
-            if test_weight and weight != test_weight:
-                weight = test_weight
-
-            weight = int(weight)
-
+            # &prod_no=12345 => 12345
             pid = urlparse.parse_qs(url)['prod_no'][0]
 
+            # try to find origin in introduction
             try:
                 origin_str = RtmartBrowser.ORIGIN_RE.findall(intro_str)[0]
+
+            # tyr to find origin in title
             except IndexError:
-                if u'台灣' in name:
-                    origin_str = u'臺灣'
-                else:
-                    origin_str = '其他'
+                origin_str = name_str
+
             origin = self.get_origin(origin_str)
+
+            # try to find count in title
+            count = self.get_count(name_str)
 
             price_str = Directory.NUM_RE.findall(price_str)[0]
             price = int(price_str)
@@ -421,10 +480,11 @@ class RtmartBrowser(MarketBrowser):
             log.error(Directory.ERROR_MAP[3] % (name_str, url))
             return None, None
 
-        product = Product(source=RtmartBrowser.INDEX_ROUTE,
+        product = Product(source=url,
                           name=name, origin=origin,
                           market_id=self.market.id,
-                          pid=pid, weight=weight)
+                          pid=pid,
+                          weight=weight)
 
         price = Price(price=price, date=self.date)
 

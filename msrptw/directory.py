@@ -40,12 +40,13 @@ class Directory(object):
         '桃園': '臺灣', '嘉義': '臺灣', '新竹': '臺灣', '苗栗': '臺灣', '南投': '臺灣', '彰化': '臺灣',
         '屏東': '臺灣', '花蓮': '臺灣', '臺東': '臺灣', '金門': '臺灣', '澎湖': '臺灣', '臺灣': '臺灣',
         '西螺': '臺灣', '美濃': '臺灣', '雲林': '臺灣', '宜蘭': '臺灣', '履歷': '臺灣', '有機': '臺灣',
+        '埔里': '臺灣',
         '澳洲': '澳洲',
         '中國': '中國',
         '美國': '美國',
         '日本': '日本', '富士': '日本',
         '韓國': '韓國',
-        '進口': '其他', '越南': '其他', '紐西': '其他', '南非': '其他', '智利': '其他', '泰國': '其他'
+        '進口': '其他'
     }
 
     UNIT_MAP = {
@@ -66,7 +67,11 @@ class Directory(object):
     ''', re.X)
 
     MULTI_RE = re.compile('''
-        (?:[*×xX][0-9]+)|(?:[0-9]+[*×xX])
+        (?:[*×xX][0-9]+)
+        |
+        (?:[0-9]+[*×xX])
+        |
+        (?:[0-9]+)(?=[袋包粒顆盒入]) 
     ''', re.X)
 
     STACK = []
@@ -116,7 +121,7 @@ class Directory(object):
 
         s = Directory.GLOBAL_REPLACE_RE.sub(replace, s)
 
-        return s
+        return s.lower()
 
     @staticmethod
     def get_origin(origin_str, default='其他'):
@@ -171,25 +176,27 @@ class Directory(object):
             session.add(product)
 
     @classmethod
-    def get_weight(cls, weight_str):
+    def get_count(cls, s):
 
-        weight_str = cls.normalize(weight_str)
+        s = cls.normalize(s)
 
-        # 120g*3入 => *3
-        counts = cls.MULTI_RE.findall(weight_str)
-
-        count = 1
+        counts = cls.MULTI_RE.findall(s)
 
         if counts:
-            # 120*3g => 120g
-            weight_str = re.sub(cls.MULTI_RE, '', weight_str)
-            # *3 => 3
             count_str = ''.join([s for s in counts[0] if s.isalnum()])
             count = int(count_str)
 
+            return count
+
+        return 1
+
+    @classmethod
+    def get_weight(cls, s):
+
+        s = cls.normalize(s)
+
         try:
-            weight_str = weight_str.lower()
-            token = cls.UNIT_RE.findall(weight_str)[0]
+            token = cls.UNIT_RE.findall(s)[0]
             for index, multiplier in cls.UNIT_MAP.values():
                 unit_value = token[index]
                 if unit_value:
@@ -198,8 +205,8 @@ class Directory(object):
                     except ValueError:
                         log.error(Directory.ERROR_MAP[0])
                         return None
-                    # 120g*3 => 120 * 1 * 3
-                    return unit_value * multiplier * count
+                    # 120g => 120 * 1 * 3
+                    return unit_value * multiplier
         except:
             return None
 
@@ -278,3 +285,9 @@ class Directory(object):
                 db_price.price = price.price
             else:
                 session.add(price)
+
+    @staticmethod
+    def flat_xpath(page, s):
+        s = ''.join(page.xpath(s)).strip()
+        s = Directory.normalize(s)
+        return s

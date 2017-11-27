@@ -116,29 +116,36 @@ class CarrfourBrowser(MarketApi):
                 name_str = dic.get('Name')
                 price_str = dic.get('Price')
                 special_price = dic.get('SpecialPrice')
-                amount_str = dic.get('ItemQtyPerPack')
+                count_str = dic.get('ItemQtyPerPack')
                 origin_route = dic.get('SeName')
-
                 pid = str(dic.get('Id'))
-                name = CarrfourBrowser.NAME_RE.findall(name_str)[0]
-                weight = Directory.get_weight(name_str)
 
+                # 紅蘿蔔500g => 紅蘿蔔
+                name = self.NAME_RE.findall(name_str)[0]
+
+                # get special price rather than normal price
                 if special_price:
                     price = float(special_price)
                 else:
                     price = float(price_str)
 
-                weight = weight * float(amount_str)
-
-                product_url = CarrfourBrowser.INDEX_ROUTE + origin_route
-                origin_str = CarrfourBrowser.get_origin(product_url)
-
+                # get origin_str and weight_str from page
+                product_url = self.INDEX_ROUTE + origin_route
+                origin_str, weight_str = self.get_infos(product_url)
                 origin = Directory.get_origin(origin_str, default='其他')
+
+                if weight_str:
+                    weight = self.get_weight(weight_str)
+                # try to find weight in title
+                else:
+                    weight = self.get_weight(name_str)
+
+                count = int(count_str)
 
             except:
                 d = {
                     'Name': name_str,
-                    'ItemQtyPerPack': amount_str,
+                    'ItemQtyPerPack': count_str,
                     'Price': price_str
                 }
                 log.error(Directory.ERROR_MAP[5] % d)
@@ -147,12 +154,13 @@ class CarrfourBrowser(MarketApi):
             price = Price(price=price,
                           date=self.date)
 
-            product = Product(source=CarrfourBrowser.INDEX_ROUTE,
+            product = Product(source=product_url,
                               name=name,
                               market_id=self.market.id,
                               pid=pid,
                               origin=origin,
-                              weight=weight)
+                              weight=weight,
+                              count=count)
 
             return product, price
 
@@ -172,13 +180,22 @@ class CarrfourBrowser(MarketApi):
         return results
 
     @staticmethod
-    def get_origin(url):
+    def get_infos(url):
+
         res = requests.get(url)
-        parsed_page = html.fromstring(res.content)
-        origin_str = ''.join(parsed_page.xpath(
-            '//div[@id="pro-content2"]//div[contains(string(), "商品來源")]/following-sibling::div[1]/text()'
-        ))
-        return origin_str
+        page = html.fromstring(res.content)
+
+        xpath = Directory.flat_xpath
+
+        origin_str = xpath(page, '''
+            //div[@id="pro-content2"]//div[contains(string(), "商品來源")]/following-sibling::div[1]/text()
+        ''')
+
+        weight_str = xpath(page, '''
+            //div[@id="pro-content2"]//div[contains(string(), "重量")]/following-sibling::div[1]/text()
+        ''')
+
+        return origin_str, weight_str
 
 
 class HonestBee(MarketApi):
@@ -222,27 +239,27 @@ class HonestBee(MarketApi):
                 unit_type = dic.get('unitType')
                 price_str = dic.get('price')
                 size_str = dic.get('size')
-                amount_str = dic.get('amountPerUnit')
+                count_str = dic.get('amountPerUnit')
+                pid_str = dic.get('pid')
 
-                pid = str(dic.get('id'))
-                name = Directory.normalize(name_str)
+                pid = str(pid_str)
+                name = self.normalize(name_str)
+                weight_str = self.normalize(size_str)
+                price = float(price_str)
+                count = int(count_str)
 
-                weight_str = Directory.normalize(size_str)
+                # try to find weight in size key
                 weight = Directory.get_weight(weight_str)
 
-                price = float(price_str)
-
-                if unit_type == 'unit_type_item':
-                    weight = weight * float(amount_str)
-
-                origin = Directory.get_origin(name, default='其他')
+                # try to find origin in title key
+                origin = Directory.get_origin(name_str, default='其他')
 
             except:
                 d = {
                     'title': name_str,
                     'unit_type': unit_type,
                     'size': size_str,
-                    'amount_unit': amount_str,
+                    'amount_unit': count_str,
                     'price': price_str
                 }
                 log.error(Directory.ERROR_MAP[5] % d)
@@ -256,7 +273,8 @@ class HonestBee(MarketApi):
                               market_id=self.market.id,
                               pid=pid,
                               origin=origin,
-                              weight=weight)
+                              weight=weight,
+                              count=count)
 
             return product, price
 
