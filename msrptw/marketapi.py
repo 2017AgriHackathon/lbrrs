@@ -246,27 +246,31 @@ class HonestBee(MarketApi):
                 unit_type = dic.get('unitType')
                 price_str = dic.get('price')
                 size_str = dic.get('size')
-                count_str = dic.get('amountPerUnit')
+
                 pid_str = dic.get('pid')
 
                 pid = str(pid_str)
                 name = self.normalize(name_str)
                 weight_str = self.normalize(size_str)
                 price = float(price_str)
-                count = float(count_str)
+
+                # try to find unit in size key
+                count = self.get_count(size_str)
 
                 # try to find weight in size key
-                weight = Directory.get_weight(weight_str)
+                weight = self.get_weight(weight_str)
 
                 # try to find origin in title key
-                origin = Directory.get_origin(name_str, default='其他')
+                origin = self.get_origin(name_str, default='其他')
+
+                # try to find unit in title
+                unit = self.get_unit(name_str)
 
             except:
                 d = {
                     'title': name_str,
                     'unit_type': unit_type,
                     'size': size_str,
-                    'amount_unit': count_str,
                     'price': price_str
                 }
                 log.error(Directory.ERROR_MAP[5] % d)
@@ -281,7 +285,8 @@ class HonestBee(MarketApi):
                               pid=pid,
                               origin=origin,
                               weight=weight,
-                              count=count)
+                              count=count,
+                              unit=unit)
 
             return product, price
 
