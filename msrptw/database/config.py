@@ -66,6 +66,9 @@ def init():
                 Alias(name='八塊'),
                 Alias(name='九塊')
             ]),
+            Part(name='雞腳', aliases=[
+                Alias(name='雞爪')
+            ]),
             Part(name='雞雜', aliases=[
                 Alias(name='雞肫'),
                 Alias(name='雞心'),
@@ -157,13 +160,14 @@ def init():
                 Alias(name='蓮子'),
                 Alias(name='小米'),
                 Alias(name='粉圓'),
+                Alias(name='紅棗'),
                 Alias(name='芝麻'),
                 Alias(name='西谷米'),
                 Alias(name='糯米'),
                 Alias(name='藜麥'),
                 Alias(name='枸杞'),
-                Alias(name='麥仁'),
-                Alias(name='紅豆薏仁')
+                Alias(name='當歸'),
+                Alias(name='麥仁')
             ]),
             Part(name='花生', aliases=[
                 Alias(name='土豆')
@@ -400,7 +404,9 @@ def init():
             Part(name='皇帝菜'),
             Part(name='廣島菜'),
             Part(name='竹筍'),
-            Part(name='蘿美')
+            Part(name='蘿美', aliases=[
+                Alias(name='蘿蔓')
+            ])
         ]
 
         fruit = Config(name='水果')
