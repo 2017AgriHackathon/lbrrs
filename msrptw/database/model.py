@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from sqlalchemy import Integer, Column, ForeignKey, Sequence, String, Unicode, Date, DateTime, Boolean
+from sqlalchemy import Integer, Column, ForeignKey, Sequence, String, Unicode, Date, DateTime, Boolean, Float, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from . import _base
@@ -21,8 +21,54 @@ class Part(_base):
     config = relationship('Config', back_populates='parts')
     products = relationship('Product')
     name = Column(Unicode(15))
+    col = Column(Float)
     aliases = relationship('Alias')
 
+    recipes = relationship('Recipe_Part', back_populates='part')
+
+
+class Author(_base):
+    __tablename__ = 'author'
+    id = Column(Integer, Sequence('author_id_seq'), primary_key=True, nullable=False)
+    name = Column(Unicode(20))
+    fan_cnt = Column(Integer)
+    author_id = Column(Integer)
+    recipes = relationship('Recipe')
+
+
+class Recipe(_base):
+    __tablename__ = 'recipe'
+    id = Column(Integer, Sequence('recipe_id_seq'), primary_key=True, nullable=False)
+    title = Column(Unicode(20))
+    url_id = Column(Integer)
+    dish_date = Column(Date)
+    during = Column(Float)
+    favor_cnt = Column(Integer)
+    view_cnt = Column(Integer)
+    comment_cnt = Column(Integer)
+    desrp = Column(Text)
+    size_cnt = Column(Integer)
+    try_cnt = Column(Integer)
+
+    author_id = Column(Integer, ForeignKey('author.id'))
+    author = relationship('Author', back_populates='recipes')
+
+    parts = relationship('Recipe_Part', back_populates='recipe')
+
+
+class Recipe_Part(_base):
+    __tablename__ = 'recipe_part'
+    recipe_id = Column(Integer, ForeignKey('recipe.id'), primary_key=True)
+    part_id = Column(Integer, ForeignKey('part.id'), primary_key=True)
+    name = Column(Unicode(20))
+    weight = Column(Integer)
+
+    count = Column(Float)
+    unit_id = Column(Integer, ForeignKey('unit.id'))
+    unit = relationship('Unit', back_populates='recipes_parts')
+
+    recipe = relationship('Recipe', back_populates='parts')
+    part = relationship('Part', back_populates='recipes')
 
 
 class Alias(_base):
@@ -55,6 +101,8 @@ class Unit(_base):
     name = Column(Unicode(5))
     level = Column(Integer)
     products = relationship('Product')
+    recipes_parts = relationship('Recipe_Part')
+
 
 class Product(_base):
     __tablename__ = 'product'

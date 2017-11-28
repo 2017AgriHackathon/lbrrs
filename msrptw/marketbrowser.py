@@ -86,7 +86,7 @@ class WellcomeBrowser(MarketBrowser):
 
     NAME = '頂好'
 
-    PRODUCTS_ROUTE = 'https://sbd-ec.wellcome.com.tw/product/listByCategory/%s?max=1000&query=%s&sort=viewCount'
+    PRODUCTS_ROUTE = 'https://sbd-ec.wellcome.com.tw/product/listByCategory/%s?max=100&query=%s&sort=viewCount&offset=%s'
     INDEX_ROUTE = 'https://sbd-ec.wellcome.com.tw'
 
     # 米
@@ -98,16 +98,18 @@ class WellcomeBrowser(MarketBrowser):
     # 起司、奶油
     # 牛奶、蛋
     # 蒟蒻、香腸等、豆腐、糕類
+    # 沙拉
 
     PRODUCT_MAP = {
         '常溫商品': [(31, 37),
                  (31, 40),
-                 (31, 42), (31, 43)
+                 (31, 42), (31, 43),
                  (31, 34),
-                 (33, 41)],
+                 (33, 41), (31, 32)],
         '冷藏商品': [(96, 97), (96, 98),
                  (103, 104), (113, 114),
-                 (108, 109), (108, 110), (108, 111), (108, 112)],
+                 (108, 109), (108, 110), (108, 111), (108, 112),
+                 (31, 33)],
         '海鮮': [(20, 21), (20, 22), (20, 23), (20, 24)],
         '牛肉': [(12, 15), (12, 18)],
         '雞肉': [(12, 13)], '豬肉': [(12, 14), (12, 17)],
@@ -124,10 +126,18 @@ class WellcomeBrowser(MarketBrowser):
 
     @staticmethod
     def get_product_urls(map_str):
-        url = WellcomeBrowser.PRODUCTS_ROUTE % (map_str[0], map_str[1])
-        page = MarketBrowser.get_html(url)
-        urls = page.xpath('//div[@class="item-name"]/a/@href')
-        return [WellcomeBrowser.INDEX_ROUTE + url for url in set(urls)]
+
+        offsets = [0, 100]
+        results = []
+
+        for offset in offsets:
+
+            url = WellcomeBrowser.PRODUCTS_ROUTE % (map_str[0], map_str[1], offset)
+            page = MarketBrowser.get_html(url)
+            urls = page.xpath('//div[@class="item-name"]/a/@href')
+            results += [WellcomeBrowser.INDEX_ROUTE + url for url in set(urls)]
+
+        return results
 
     def get_product_price(self, url):
 
@@ -192,14 +202,36 @@ class GeantBrowser(MarketBrowser):
     PRODUCTS_ROUTE = 'http://www.gohappy.com.tw/shopping/Browse.do?op=vc&cid=%s&sid=12'
     INDEX_ROUTE = 'http://www.gohappy.com.tw'
 
+    # 米
+    # 麵
+    # 罐頭 (泡菜、玉米、鳳梨、鮪魚、高湯)
+    # 咖哩
+    # 粉、香料
+    # 鹹醬
+    # 甜醬
+
+    # 起司、奶油
+    # 牛奶、蛋
+    # 蒟蒻、香腸等、豆腐、糕類
+    # 沙拉味增
+
     PRODUCT_MAP = {
-        '常溫商品': ['52509', '161719', '291776', '296465', '296568', '5008'],
-        '冷藏商品': ['161464', '161720', '161762', '301327', '301328', '53915', '53909'],
-        '海鮮': ['210977', '210975'],
-        '牛肉': ['215205'],
-        '雞肉': ['301299'], '豬肉': ['212375'],
-        '雜貨': ['295095'], '蔬菜': ['29979', '358367', '161460&cp=1', '161460&cp=2', '215204', '161755'],
-        '水果': ['208879']
+        '常溫商品': [296465,
+                 291776,
+                 5008, 934, 297075, 296531, 29703, 300529, 296563,
+                 293897,
+                 296568,
+                 296297, 307858, 247, 29689, 1448, 7322, 297059, 29031, 297068,
+                 35593, 19402],
+        '冷藏商品': [156695, 161465, 296293,
+                 161464,
+                 301327, 301328, 301326, 40760, 161724, 161720,
+                 297029, 161762],
+        '海鮮': [210977, 210975],
+        '牛肉': [215205],
+        '雞肉': [301299], '豬肉': [212375],
+        '雜貨': [295095], '蔬菜': [29979, 358367, '161460&cp=1', '161460&cp=2', 215204, 161755],
+        '水果': [208879]
     }
 
     NAME_RE = re.compile('''
@@ -322,11 +354,29 @@ class FengKangBrowser(MarketBrowser):
     PRODUCTS_ROUTE = 'http://shop.supermarket.com.tw/Shop_ProductList.html?c0=%s&c1=%s&c2=%s&page=%s'
     INDEX_ROUTE = 'http://shop.supermarket.com.tw'
 
+    # 米
+    # 麵
+    # 罐頭、咖哩
+    # 粉、香料
+    # 鹹醬
+    # 甜醬
+
+    # 起司、奶油
+    # 牛奶、蛋
+    # 蒟蒻、香腸等、豆腐、糕類
+    # 沙拉味增
+
     PRODUCT_MAP = {
-        '常溫商品': [(0, 153, 236, 1), (0, 153, 358, 1), (0, 153, 245, 1), (0, 153, 387, 1),
-                 (0, 153, 245, 1), (0, 154, 260, 1), (0, 154, 246, 1), (0, 154, 254, 1)],
-        '冷藏商品': [(1, 157, 304, 1), (1, 157, 306, 1), (1, 157, 310, 1),
-                 (1, 157, 303, 1), (1, 158, 312, 1)],
+        '常溫商品': [(0, 153, 236, 1),
+                 (0, 153, 245, 1), (0, 153, 387, 1),
+                 (0, 154, 246, 1), (0, 154, 268, 1), (0, 154, 384, 1), (0, 154, 260, 1),
+                 (0, 153, 358, 1), (0, 154, 250, 1), (0, 154, 252, 1),
+                 (0, 154, 267, 1), (0, 154, 256, 1), (0, 154, 262, 1), (0, 154, 264, 1), (0, 154, 258, 1), (0, 154, 267, 1), (0, 157, 307, 1),
+                 (0, 154, 254, 1)],
+        '冷藏商品': [(1, 157, 305, 1), (0, 154, 254, 1),
+                 (1, 158, 312, 1),
+                 (1, 157, 303, 1), (1, 157, 304, 1), (1, 157, 310, 1),
+                 (1, 157, 306, 1), (1, 157, 309, 1)],
         '海鮮': [(1, 364, 347, 1), (1, 364, 368, 1), (2, 165, 514, 1), (2, 165, 316, 1), (2, 165, 348, 1),
                (2, 165, 349, 1), (2, 165, 359, 1)],
         '牛肉': [(1, 160, 328, 1), (2, 167, 354, 1), (2, 167, 355, 1)],
@@ -427,19 +477,41 @@ class RtmartBrowser(MarketBrowser):
 
     NAME = '大潤發'
 
-    FRESH_ROUTE = 'http://www.rt-mart.com.tw/fresh/index.php?action=product_sort&prod_sort_uid=%s&p_data_num=200'
-    NORMAL_ROUTE = 'http://www.rt-mart.com.tw/direct/index.php?action=product_sort&prod_sort_uid=%s&p_data_num=200'
+    FRESH_ROUTE = 'http://www.rt-mart.com.tw/fresh/index.php?action=product_sort&prod_sort_uid=%s&p_data_num=400'
+    NORMAL_ROUTE = 'http://www.rt-mart.com.tw/direct/index.php?action=product_sort&prod_sort_uid=%s&p_data_num=400'
 
     INDEX_ROUTE = 'http://www.rt-mart.com.tw'
 
+    # 米
+    # 麵
+    # 罐頭 (泡菜、玉米、鳳梨、鮪魚、高湯)
+    # 咖哩
+    # 粉、香料
+    # 鹹醬
+    # 甜醬
+
+    # 起司、奶油
+    # 牛奶、蛋
+    # 蒟蒻、香腸等、豆腐、糕類
+    # 沙拉味增
+
     PRODUCT_MAP = {
-        '常溫商品': ['52509', '52741', '52736', '52737', '3763'],
-        '冷藏商品': ['53901', '53916', '53913', '53911', '53914', '53915', '53909'],
-        '海鮮': ['52701', '52702', '52703', '52704'],
-        '牛肉': ['52698'], '羊肉': ['52699'],
-        '雞肉': ['52697'], '豬肉': ['52696'],
-        '蔬菜': ['52494'], '水果': ['52495'],
-        '雜貨': ['3767']
+        '常溫商品': [(3762, 0),
+                 (3763, 0),
+                 (3787, 0),
+                 (37824, 0),
+                 (37840, 0), (37712, 0),
+                 (3765, 0),
+                 (3790, 0)],
+        '冷藏商品': [(53914, 1),
+                 (53901, 1), (53916, 1),
+                 (53910, 1), (53909, 1), (53913, 1), (53915, 1),
+                 (53911, 1)],
+        '海鮮': [(52701, 1), (52702, 1), (52703, 1), (52704, 1)],
+        '牛肉': [(52698, 1)], '羊肉': [(52699, 1)],
+        '雞肉': [(52697, 1)], '豬肉': [(52696, 1)],
+        '蔬菜': [(52494, 1)], '水果': [(52495, 1)],
+        '雜貨': [(3767, 0)]
     }
 
     NAME_RE = re.compile('''
@@ -459,10 +531,13 @@ class RtmartBrowser(MarketBrowser):
 
     @staticmethod
     def get_product_urls(map_str):
-        if len(map_str) == 4:
-            url = RtmartBrowser.FRESH_ROUTE % map_str
+
+        normal = map_str[1] == 0
+
+        if normal:
+            url = RtmartBrowser.NORMAL_ROUTE % map_str[0]
         else:
-            url = RtmartBrowser.NORMAL_ROUTE % map_str
+            url = RtmartBrowser.FRESH_ROUTE % map_str[0]
         page = MarketBrowser.get_html(url)
         urls = page.xpath('//div[@class="classify_prolistBox"]//h5[@class="for_proname"]/a/@href')
         return [url for url in set(urls)]
