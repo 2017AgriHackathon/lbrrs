@@ -156,22 +156,20 @@ def init():
                 Alias(name='大薏仁'),
                 Alias(name='紅豆薏仁', anti=True)
             ]),
-            Part(name='其他雜糧', aliases=[
-                Alias(name='蓮子'),
-                Alias(name='小米'),
-                Alias(name='粉圓'),
-                Alias(name='紅棗'),
-                Alias(name='芝麻'),
-                Alias(name='西谷米'),
-                Alias(name='糯米'),
-                Alias(name='藜麥'),
-                Alias(name='枸杞'),
-                Alias(name='當歸'),
-                Alias(name='麥仁'),
-                Alias(name='八角'),
-                Alias(name='山楂'),
-                Alias(name='桂圓')
-            ]),
+            Part(name='蓮子'),
+            Part(name='小米'),
+            Part(name='粉圓'),
+            Part(name='紅棗'),
+            Part(name='芝麻'),
+            Part(name='西谷米'),
+            Part(name='糯米'),
+            Part(name='藜麥'),
+            Part(name='枸杞'),
+            Part(name='當歸'),
+            Part(name='麥仁'),
+            Part(name='八角'),
+            Part(name='山楂'),
+            Part(name='桂圓'),
             Part(name='花生', aliases=[
                 Alias(name='土豆')
             ]),
@@ -211,24 +209,21 @@ def init():
                 Alias(name='胡蘿蔔')
             ]),
             Part(name='馬鈴薯'),
-            Part(name='不結球白菜', aliases=[
-                Alias(name='小白菜'),
-                Alias(name='青江菜'),
-                Alias(name='青江白菜'),
-                Alias(name='葉白菜'),
-                Alias(name='奶油白菜'),
-                Alias(name='翠白菜'),
-                Alias(name='味美菜'),
-                Alias(name='小松菜'),
-                Alias(name='青松菜'),
-                Alias(name='蚵白菜'),
-                Alias(name='蚵仔白菜')
+            Part(name='小白菜'),
+            Part(name='青江菜'),
+            Part(name='青江白菜'),
+            Part(name='葉白菜'),
+            Part(name='奶油白菜'),
+            Part(name='翠白菜'),
+            Part(name='味美菜'),
+            Part(name='小松菜'),
+            Part(name='青松菜'),
+            Part(name='蚵白菜', aliases=[
+                Part(name='蚵仔白菜')
             ]),
-            Part(name='結球白菜', aliases=[
-                Alias(name='包心白菜'),
-                Alias(name='大白菜'),
-                Alias(name='娃娃菜')
-            ]),
+            Part(name='包心白菜'),
+            Part(name='大白菜'),
+            Part(name='娃娃菜'),
             Part(name='萵苣', aliases=[
                 Alias(name='A菜'),
                 Alias(name='大陸妹')
@@ -268,25 +263,23 @@ def init():
             ]),
             Part(name='乾香菇'),
             Part(name='金針菇'),
-            Part(name='其他食用菇', aliases=[
-                Alias(name='雪白菇'),
-                Alias(name='金絲菇'),
-                Alias(name='三絲菇'),
-                Alias(name='雨來菇'),
-                Alias(name='白玉菇'),
-                Alias(name='黑美人菇'),
-                Alias(name='白精靈菇'),
-                Alias(name='真珠菇'),
-                Alias(name='秀珍菇'),
-                Alias(name='袖珍菇'),
-                Alias(name='鴻喜菇'),
-                Alias(name='珊瑚菇'),
-                Alias(name='白靈菇'),
-                Alias(name='美白菇'),
-                Alias(name='金喜菇'),
-                Alias(name='金滑菇'),
-                Alias(name='舞菇')
-            ]),
+            Part(name='雪白菇'),
+            Part(name='金絲菇'),
+            Part(name='三絲菇'),
+            Part(name='雨來菇'),
+            Part(name='白玉菇'),
+            Part(name='黑美人菇'),
+            Part(name='白精靈菇'),
+            Part(name='真珠菇'),
+            Part(name='秀珍菇'),
+            Part(name='袖珍菇'),
+            Part(name='鴻喜菇'),
+            Part(name='珊瑚菇'),
+            Part(name='白靈菇'),
+            Part(name='美白菇'),
+            Part(name='金喜菇'),
+            Part(name='金滑菇'),
+            Part(name='舞菇'),
             Part(name='芋頭'),
             Part(name='韭菜', aliases=[
                 Alias(name='韭菜花'),
@@ -473,8 +466,6 @@ def init():
             Part(name='醋'),
             Part(name='糖'),
             Part(name='味霖'),
-            Part(name='水'),
-
 
             Part(name='白米'),
             Part(name='糙米'),
@@ -490,7 +481,6 @@ def init():
             ]),
             Part(name='麵粉', aliases=[
                 Alias(name='澱粉')
-
             ]),
             Part(name='番薯粉'),
             Part(name='太白粉'),
