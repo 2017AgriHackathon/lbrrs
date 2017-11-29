@@ -219,7 +219,7 @@ def init():
             Part(name='小松菜'),
             Part(name='青松菜'),
             Part(name='蚵白菜', aliases=[
-                Part(name='蚵仔白菜')
+                Alias(name='蚵仔白菜')
             ]),
             Part(name='包心白菜'),
             Part(name='大白菜'),

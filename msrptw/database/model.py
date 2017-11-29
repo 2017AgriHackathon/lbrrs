@@ -22,6 +22,8 @@ class Part(_base):
     products = relationship('Product')
     name = Column(Unicode(15))
     col = Column(Float)
+    unit_id = Column(Integer, ForeignKey('unit.id'))
+    unit = relationship('Unit', back_populates='parts')
     aliases = relationship('Alias')
 
     recipes = relationship('Recipe_Part', back_populates='part')
@@ -100,6 +102,7 @@ class Unit(_base):
     id = Column(Integer, Sequence('unit_id_seq'), primary_key=True, nullable=False)
     name = Column(Unicode(5))
     level = Column(Integer)
+    parts = relationship('Part')
     products = relationship('Product')
     recipes_parts = relationship('Recipe_Part')
 
@@ -152,10 +155,4 @@ class Log(_base):
         return self.__repr__()
 
     def __repr__(self):
-
         return '<Log: %s - %s>' % (self.created_at.strftime('%m/%d/%Y-%H:%M:%S'), self.msg[:50])
-
-
-
-
-
