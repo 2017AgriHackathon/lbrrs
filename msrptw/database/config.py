@@ -9,8 +9,6 @@ from .model import Config, Market, Part, Origin, Alias, Unit
 engine = None
 
 
-
-
 def setup_session(db_path):
     global engine
     engine = create_engine(db_path)
