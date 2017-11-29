@@ -24,15 +24,29 @@ class Directory(object):
     ''', re.X)
 
     GLOBAL_REPLACE_RE = re.compile('''
-        [ 　台]
+        [ 　台／.]
         |
-        [０-９]    
+        [０-９] 
+        |
+        [ａ-ｚ]
+        |
+        [一二三四五六七八九]?
+        十?
+        [一二三四五六七八九]
     ''', re.X)
 
     TO_REPLACE_MAP = {
-        '台': '臺',
+        '台': '臺', '／': '/',
         '１': '1', '２': '2', '３': '3', '４': '4', '５': '5',
-        '６': '6', '７': '7', '８': '8', '９': '9', '０': '0'
+        '６': '6', '７': '7', '８': '8', '９': '9', '０': '0',
+        'ａ': 'a', 'ｂ': 'b', 'ｃ': 'c', 'ｄ': 'd', 'ｅ': 'e',
+        'ｆ': 'f', 'ｇ': 'g', 'ｈ': 'h', 'ｉ': 'i', 'ｊ': 'j',
+        'ｋ': 'k', 'ｌ': 'l', 'ｍ': 'm', 'ｎ': 'n', 'ｏ': 'o',
+        'ｐ': 'p', 'ｑ': 'q', 'ｒ': 'r', 'ｓ': 's', 'ｔ': 't',
+        'ｕ': 'u', 'ｖ': 'v', 'ｗ': 'w', 'ｘ': 'x', 'ｙ': 'y',
+        'ｚ': 'z',
+        '一': '1', '二': '2', '三': '3', '四': '4', '五': '5',
+        '六': '6', '七': '7', '八': '8', '九': '9',
     }
 
     ORIGIN_MAP = {
@@ -49,29 +63,48 @@ class Directory(object):
         '進口': '其他'
     }
 
-    UNIT_MAP = {
-        'kg': (0, 1000), 'l': (0, 1000),
-        'g': (1, 1), 'ml': (1, 1), 'cc': (1, 1),
-        '公斤': (0, 1000), '公克': (1, 1), '克': (1, 1),
-        '公升': (0, 1000), '毫升': (1, 1),
-    }
+    UNIT_SET = (1000, 1, 15, 5, 240, 340, 600, 37.5, 454, 28.35, 10, 290, 0.5, 40)
 
     UNIT_RE = re.compile('''
         (?:
-            (?=\D?)
-            (?P<kg>[0-9]+?\.[0-9]+|[0-9]+)(?=kg|公斤|公升|l)
+            (?=\D?)(?P<kg>[0-9]+?[./][0-9]+|[0-9]+)(?=kg|公斤|公升|l)                #1000
             |
-            (?=\D?)
-            (?P<g>[0-9]+?\.[0-9]+|[0-9]+)(?=g|公克|克|毫升|ml|cc)
+            (?=\D?)(?P<g>[0-9]+?[./][0-9]+|[0-9]+)(?=g|公克|克|毫升|ml|cc)           #1
+            |
+            (?=\D?)(?P<u2>[0-9]+?[./][0-9]+|[0-9]+)[大](?=匙|tbs)                    #15
+            |
+            (?=\D?)(?P<u3>[0-9]+?[./][0-9]+|[0-9]+)[小平]?(?=茶匙|湯匙|匙|tsp|微量|撮|搓) #5
+            |
+            (?=\D?)(?P<u4>[0-9]+?[./][0-9]+|[0-9]+)[小]?(?=杯|碗|cup)                #240
+            |
+            (?=\D?)(?P<u5>[0-9]+?[./][0-9]+|[0-9]+)[大](?=杯|碗|罐)                  #340
+            |
+            (?=\D?)(?P<u6>[0-9]+?[./][0-9]+|[0-9]+)(?=斤)                            #600
+            |
+            (?=\D?)(?P<u7>[0-9]+?[./][0-9]+|[0-9]+)(?=兩)                            #37.5
+            |
+            (?=\D?)(?P<u8>[0-9]+?[./][0-9]+|[0-9]+)(?=磅)                            #454
+            |
+            (?=\D?)(?P<u9>[0-9]+?[./][0-9]+|[0-9]+)(?=盎司)                          #28.35
+            |
+            (?=\D?)(?P<u10>[0-9]+?[./][0-9]+|[0-9]+)[中](?=匙)                       #10
+            |
+            (?=\D?)(?P<u11>[0-9]+?[./][0-9]+|[0-9]+)[中](?=碗|飯碗)                  #290
+            |
+            (?=\D?)(?P<u12>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?=滴)                    #0.5
+            |
+            (?=\D?)(?P<u13>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?=球)                    #40       
+            |
+            (?=\D?)(?P<value>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?P<other_unit>[張尾把個片粒顆支條包袋盒瓶罐入])               
         )
     ''', re.X)
+
+    CHINESE_NUMERALS_SET = set('一二三四五六七八九十')
 
     MULTI_RE = re.compile('''
         (?:[*×xX][0-9]+)
         |
         (?:[0-9]+[*×xX])
-        |
-        (?:[0-9]+)(?=[根粒顆支條包袋盒瓶罐入]) 
     ''', re.X)
 
     STACK = []
@@ -115,8 +148,18 @@ class Directory(object):
 
             found = m.group()
 
+            found = m.group()
+
             if found in Directory.TO_REPLACE_MAP:
                 return Directory.TO_REPLACE_MAP[found]
+
+            # for '十一' to '九十九'
+            if found[0] in Directory.CHINESE_NUMERALS_SET:
+                len_found = len(found)
+                if len_found == 2:
+                    return '1' + Directory.TO_REPLACE_MAP[found[1]]
+                if len_found == 3:
+                    return Directory.TO_REPLACE_MAP[found[0]] + Directory.TO_REPLACE_MAP[found[2]]
 
             return ''
 
@@ -202,13 +245,24 @@ class Directory(object):
     @classmethod
     def get_weight(cls, s):
 
+        def convert_frac(frac_str):
+            num, denom = frac_str.split('/')
+            return float(num) / float(denom)
+
         s = cls.normalize(s)
 
+        s = re.sub('半', '0.5', s)
+        s = re.sub('數', '3', s)
+
         try:
+
             token = cls.UNIT_RE.findall(s)[0]
-            for index, multiplier in cls.UNIT_MAP.values():
+
+            for index, multiplier in enumerate(cls.UNIT_SET):
                 unit_value = token[index]
                 if unit_value:
+                    if '/' in unit_value:
+                        unit_value = convert_frac(unit_value)
                     try:
                         unit_value = float(unit_value)
                     except ValueError:
@@ -268,7 +322,6 @@ class Directory(object):
     @staticmethod
     def check_product(product):
         with session_scope() as session:
-
             db_product = session.query(Product).filter(
                 Product.pid == product.pid
             ).filter(
