@@ -648,7 +648,9 @@ def init():
             Part(name='冰', aliases=[
                 Alias(name='冰淇淋')
             ]),
-            Part(name='水餃')
+            Part(name='水餃', aliases=[
+                Alias(name='煎餃')
+            ])
         ]
 
         session.add(chicken)
