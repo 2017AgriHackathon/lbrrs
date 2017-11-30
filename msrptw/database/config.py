@@ -72,14 +72,12 @@ def init():
             Part(name='雞腳', aliases=[
                 Alias(name='雞爪')
             ]),
-            Part(name='雞雜', aliases=[
-                Alias(name='雞肫'),
-                Alias(name='雞心'),
-                Alias(name='雞尾椎'),
-                Alias(name='雞屁股'),
-                Alias(name='雞尾椎'),
-                Alias(name='雞胗')
-            ])
+            Part(name='雞肫'),
+            Part(name='雞心'),
+            Part(name='雞尾椎'),
+            Part(name='雞屁股'),
+            Part(name='雞尾椎'),
+            Part(name='雞胗')
         ]
 
         pork = Config(name='豬肉')
