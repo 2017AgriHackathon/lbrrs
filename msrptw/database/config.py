@@ -599,8 +599,12 @@ def init():
 
         seafood = Config(name='海鮮')
         seafood.parts = [
-            Part(name='蝦'),
-            Part(name='蟹'),
+            Part(name='蝦', aliases=[
+                Alias(name='沙拉', anti=True)
+            ]),
+            Part(name='蟹', aliases=[
+                Alias(name='蟹棒')
+            ]),
             Part(name='小卷'),
             Part(name='透抽'),
             Part(name='花枝'),
@@ -639,6 +643,14 @@ def init():
             Part(name='羊')
         ]
 
+        freezings = Config(name='冷凍商品')
+        freezings.parts = [
+            Part(name='冰', aliases=[
+                Alias(name='冰淇淋')
+            ]),
+            Part(name='水餃')
+        ]
+
         session.add(chicken)
         session.add(pork)
         session.add(groceries)
@@ -649,6 +661,7 @@ def init():
         session.add(seafood)
         session.add(beef)
         session.add(goat)
+        session.add(freezings)
 
         g = Market(name='愛買')
         w = Market(name='頂好')
