@@ -212,8 +212,9 @@ def init():
             ]),
             Part(name='馬鈴薯'),
             Part(name='小白菜'),
-            Part(name='青江菜'),aliases=[
+            Part(name='青江菜', aliases=[
                 Alias(name='清江菜')]
+            ),
             Part(name='青江白菜'),
             Part(name='葉白菜'),
             Part(name='奶油白菜'),
@@ -257,7 +258,7 @@ def init():
                 Alias(name='紅椒'),
                 Alias(name='黃椒'),
                 Alias(name='菜椒'),
-                Alias(name='花椒' anti=True),
+                Alias(name='花椒', anti=True),
                 Alias(name='彩椒')
             ]),
             Part(name='空心菜', aliases=[
