@@ -85,7 +85,8 @@ def init():
             Part(name='豬腹脇肉', aliases=[
                 Alias(name='五花'),
                 Alias(name='五花肉'),
-                Alias(name='三層')
+                Alias(name='三層'),
+                Alias(name='豬肉')
             ]),
             Part(name='豬肩胛肉', aliases=[
                 Alias(name='梅花'),
@@ -240,9 +241,10 @@ def init():
             Part(name='地瓜', aliases=[
                 Alias(name='地瓜葉', anti=True)
             ]),
-            Part(name='青蔥', aliases=[
+            Part(name='蔥', aliases=[
                 Alias(name='蔥頭', anti=True),
-                Alias(name='三星蔥')
+                Alias(name='三星蔥'),
+                Alias(name='洋蔥', anti=True)
             ]),
             Part(name='玉米', aliases=[
                 Alias(name='玉米筍', anti=True)
@@ -365,9 +367,10 @@ def init():
                 Alias(name='黃瓜'),
                 Alias(name='小黃瓜', anti=True)
             ]),
-            Part(name='蒜頭', aliases=[
+            Part(name='蒜', aliases=[
                 Alias(name='大蒜'),
-                Alias(name='蒜末')
+                Alias(name='蒜味', anti=True),
+                Alias(name='蒜頭')
             ]),
             Part(name='紅蔥頭'),
             Part(name='冬瓜'),
@@ -472,13 +475,18 @@ def init():
                 Alias(name='奶油', anti=True)
             ]),
             Part(name='酒', aliases=[
-                Alias(name='米酒', anti=True)
+                Alias(name='米酒')
             ]),
             Part(name='醋'),
             Part(name='糖'),
-            Part(name='味霖'),
+            Part(name='味霖', aliases=[
+                Alias(name='味林')
+            ]),
+            Part(name='水'),
 
-            Part(name='白米'),
+            Part(name='白米', aliases=[
+                Alias(name='白飯')
+            ]),
             Part(name='糙米'),
             Part(name='黑米'),
             Part(name='壽司米'),

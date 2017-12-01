@@ -22,8 +22,6 @@ class Part(_base):
     products = relationship('Product')
     name = Column(Unicode(15))
     col = Column(Float)
-    unit_id = Column(Integer, ForeignKey('unit.id'))
-    unit = relationship('Unit', back_populates='parts')
     aliases = relationship('Alias')
 
     recipes = relationship('Recipe_Part', back_populates='part')
@@ -33,25 +31,24 @@ class Author(_base):
     __tablename__ = 'author'
     id = Column(Integer, Sequence('author_id_seq'), primary_key=True, nullable=False)
     name = Column(Unicode(20))
-    fan_cnt = Column(Integer)
-    author_id = Column(Integer)
+    fans = Column(Integer)
+    aid = Column(String(30))
     recipes = relationship('Recipe')
 
 
 class Recipe(_base):
     __tablename__ = 'recipe'
     id = Column(Integer, Sequence('recipe_id_seq'), primary_key=True, nullable=False)
-    title = Column(Unicode(20))
+    name = Column(Unicode(100))
     url_id = Column(Integer)
-    dish_date = Column(Date)
-    during = Column(Float)
-    favor_cnt = Column(Integer)
-    view_cnt = Column(Integer)
-    comment_cnt = Column(Integer)
-    desrp = Column(Text)
-    size_cnt = Column(Integer)
-    try_cnt = Column(Integer)
-
+    date = Column(Date)
+    duration = Column(Float)
+    favors = Column(Integer)
+    views = Column(Integer)
+    comments = Column(Integer)
+    description = Column(Text)
+    size = Column(Float)
+    trys = Column(Integer)
     author_id = Column(Integer, ForeignKey('author.id'))
     author = relationship('Author', back_populates='recipes')
 
@@ -60,9 +57,10 @@ class Recipe(_base):
 
 class Recipe_Part(_base):
     __tablename__ = 'recipe_part'
-    recipe_id = Column(Integer, ForeignKey('recipe.id'), primary_key=True)
-    part_id = Column(Integer, ForeignKey('part.id'), primary_key=True)
-    name = Column(Unicode(20))
+    id = Column(Integer, Sequence('recipe_part_id_seq'), primary_key=True, nullable=False)
+    recipe_id = Column(Integer, ForeignKey('recipe.id'), nullable=False)
+    part_id = Column(Integer, ForeignKey('part.id'), nullable=True)
+    name = Column(Unicode(30))
     weight = Column(Integer)
 
     count = Column(Float)
@@ -102,7 +100,6 @@ class Unit(_base):
     id = Column(Integer, Sequence('unit_id_seq'), primary_key=True, nullable=False)
     name = Column(Unicode(5))
     level = Column(Integer)
-    parts = relationship('Part')
     products = relationship('Product')
     recipes_parts = relationship('Recipe_Part')
 
@@ -155,4 +152,10 @@ class Log(_base):
         return self.__repr__()
 
     def __repr__(self):
+
         return '<Log: %s - %s>' % (self.created_at.strftime('%m/%d/%Y-%H:%M:%S'), self.msg[:50])
+
+
+
+
+

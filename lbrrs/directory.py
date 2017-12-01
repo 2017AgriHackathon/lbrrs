@@ -8,7 +8,7 @@ from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
 from . import _logging_config_path
 from .database.config import session_scope
-from .database.model import Market, Product, Config, Origin, Price, Part, Unit
+from .database.model import Market, Product, Config, Origin, Price, Part, Unit, Author, Recipe
 
 fileConfig(_logging_config_path)
 log = logging.getLogger(__name__)
@@ -19,12 +19,16 @@ class Directory(object):
     attribute from sqlalchemy, as a database entry also provides
     basic text parsing settings"""
 
+    NAME = None
+
+    PRODUCT_MAP = None
+
     NUM_RE = re.compile('''
             (?:\d+)
     ''', re.X)
 
     GLOBAL_REPLACE_RE = re.compile('''
-        [ 　台／.]
+        [ 　台／]
         |
         [０-９] 
         |
@@ -128,9 +132,6 @@ class Directory(object):
 
     def __init__(self):
 
-        if not self.PRODUCT_MAP or not self.NAME:
-            raise NotImplementedError
-
         self.date = datetime.date.today().strftime('%Y-%m-%d')
 
         with session_scope() as session:
@@ -138,15 +139,16 @@ class Directory(object):
                 subqueryload(Config.parts).subqueryload(Part.aliases)
             ).all()
             self.units = session.query(Unit).order_by(Unit.level.desc()).all()
-            self.market = session.query(Market).filter(Market.name == self.NAME).first()
+
+            if self.PRODUCT_MAP and self.NAME:
+                self.market = session.query(Market).filter(Market.name == self.NAME).first()
+
             session.expunge_all()
 
     @staticmethod
     def normalize(s):
 
         def replace(m):
-
-            found = m.group()
 
             found = m.group()
 
@@ -256,40 +258,52 @@ class Directory(object):
 
         try:
 
-            token = cls.UNIT_RE.findall(s)[0]
+            tokens = cls.UNIT_RE.findall(s)
 
-            for index, multiplier in enumerate(cls.UNIT_SET):
-                unit_value = token[index]
-                if unit_value:
-                    if '/' in unit_value:
-                        unit_value = convert_frac(unit_value)
-                    try:
-                        unit_value = float(unit_value)
-                    except ValueError:
-                        log.error(Directory.ERROR_MAP[0])
-                        return None
-                    # 120g => 120 * 1 * 3
-                    return unit_value * multiplier
+            for token in tokens:
+                for index, multiplier in enumerate(cls.UNIT_SET):
+                    unit_value = token[index]
+                    if unit_value:
+                        if '/' in unit_value:
+                            unit_value = convert_frac(unit_value)
+                        try:
+                            unit_value = float(unit_value)
+                        except ValueError:
+                            log.error(Directory.ERROR_MAP[0])
+                            return None
+                        # 120g => 120 * 1 * 3
+                        return unit_value * multiplier
         except:
             return None
 
     @staticmethod
-    def classify_product_auto(config, product):
+    def classify(config, s):
+        find = False
+        find_alias_id = None
+
         for part in config.parts:
-            find = False
-            if part.name in product.name:
+            if part.name in s:
                 find = True
             for alias in part.aliases:
-                if alias.name in product.name and not alias.anti:
-                    product.alias_id = alias.id
+                if alias.name in s and not alias.anti:
+                    find_alias_id = alias.id
                     find = True
             for alias in part.aliases:
-                if alias.name in product.name and alias.anti:
+                if alias.name in s and alias.anti:
                     find = False
             if find:
-                product.part_id = part.id
-                log.info(Directory.INFO_MAP[4] % (product.name, part.name))
-                return product
+                return part.id, find_alias_id
+
+        return None, None
+
+    @staticmethod
+    def classify_product_auto(config, product):
+        part_id, alias_id = Directory.classify(config, product.name)
+        if part_id:
+            product.part_id = part_id
+            log.info(Directory.INFO_MAP[4] % (product.name, part.name))
+        if alias_id:
+            product.alias = alias_id
         return product
 
     @staticmethod
@@ -353,3 +367,55 @@ class Directory(object):
         s = ''.join(page.xpath(s)).strip()
         s = Directory.normalize(s)
         return s
+
+    def get_part(self, s):
+        for config in self.configs:
+            part_id, alias_id = Directory.classify(config, s)
+            if part_id:
+                return part_id
+        return None
+
+    @staticmethod
+    def check_author(author):
+        with session_scope() as session:
+            db_author = session.query(Author).filter(
+                Author.name == author.name
+            ).first()
+
+            if db_author:
+                session.expunge(db_author)
+                return db_author
+
+            return author
+
+    @staticmethod
+    def check_recipe(recipe):
+        with session_scope() as session:
+            db_recipe = session.query(Recipe).filter(
+                Recipe.name == recipe.name
+            ).filter(
+                Recipe.url_id == recipe.url_id
+            ).first()
+
+            if db_recipe:
+                session.expunge(db_recipe)
+                return db_recipe
+
+            return recipe
+
+    @staticmethod
+    def set_author(author):
+        with session_scope() as session:
+            session.add(author)
+
+    @staticmethod
+    def set_recipe(recipe):
+        with session_scope() as session:
+            session.add(recipe)
+
+    @staticmethod
+    def set_recipe_part(recipe_part):
+        with session_scope() as session:
+            session.add(recipe_part)
+
+
