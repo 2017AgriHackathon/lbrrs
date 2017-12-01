@@ -308,9 +308,9 @@ class Directory(object):
         part_id, alias_id = Directory.classify(config, product.name)
         if part_id:
             product.part_id = part_id
-            log.info(Directory.INFO_MAP[4] % (product.name, part.name))
+            log.info(Directory.INFO_MAP[4] % (product.name, part_id))
         if alias_id:
-            product.alias = alias_id
+            product.alias_id = alias_id
         return product
 
     @staticmethod
