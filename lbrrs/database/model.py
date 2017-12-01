@@ -33,7 +33,7 @@ class Nutrition(_base):
     __tablename__ = 'nutrition'
     id = Column(Integer, Sequence('nutrition_id_seq'), primary_key=True, nullable=False)
     part_id = Column(Integer, ForeignKey('part.id'))
-    part = relationship('Unit', back_populates='nutritions')
+    part = relationship('Part', back_populates='nutritions')
     col = Column(Float)
     fat = Column(Float)
     protein = Column(Float)

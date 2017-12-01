@@ -15,18 +15,6 @@ def build(db_path, setup):
             config.init()
             return
 
-        w = marketbrowser.WellcomeBrowser()
-        w.direct()
-
-        g = marketbrowser.GeantBrowser()
-        g.direct()
-
-        f = marketbrowser.FengKangBrowser()
-        f.direct()
-
-        r1 = marketbrowser.RtmartBrowser()
-        r1.direct()
-
         r2 = marketapi.Rtmart()
         r2.direct()
 
