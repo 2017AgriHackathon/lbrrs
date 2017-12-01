@@ -236,8 +236,15 @@ class Directory(object):
 
         counts = cls.MULTI_RE.findall(s)
 
+        def is_int(s):
+            try:
+                int(s)
+                return True
+            except:
+                return False
+
         if counts:
-            count_str = ''.join([s for s in counts[0] if s.isalnum()])
+            count_str = ''.join([s for s in counts[0] if is_int(s)])
             count = int(count_str)
 
             return count

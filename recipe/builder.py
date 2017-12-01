@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+import pandas as pd
 from argparse import ArgumentParser
 from lbrrs.database import config
 from lbrrs.directory import Directory
 from lbrrs.database.model import Recipe, Recipe_Part, Author
-from pandas import DataFrame
 import re
 
 
@@ -29,7 +29,7 @@ def build(db_path):
     if db_path:
         config.setup_session(db_path)
 
-        df = pd.read_excel('icook_6000.xlsx', dtype=str)
+        df = pd.read_excel('recipe\\icook_food_re.xlsx', dtype=str)
 
         config.setup_session('postgresql+psycopg2://postgres:1qaz@WSX@104.199.238.161/lbrrs')
         directory = Directory()

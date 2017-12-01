@@ -23,10 +23,23 @@ class Part(_base):
     unit = relationship('Unit', back_populates='parts')
     products = relationship('Product')
     name = Column(Unicode(15))
-    col = Column(Float)
     aliases = relationship('Alias')
+    nutritions = relationship('Nutrition')
 
     recipes = relationship('Recipe_Part', back_populates='part')
+
+
+class Nutrition(_base):
+    __tablename__ = 'nutrition'
+    id = Column(Integer, Sequence('nutrition_id_seq'), primary_key=True, nullable=False)
+    part_id = Column(Integer, ForeignKey('part.id'))
+    part = relationship('Unit', back_populates='nutritions')
+    col = Column(Float)
+    fat = Column(Float)
+    protein = Column(Float)
+    carbohydrate = Column(Float)
+    fiber = Column(Float)
+    sugar = Column(Float)
 
 
 class Author(_base):
