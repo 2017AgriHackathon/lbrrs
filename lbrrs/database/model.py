@@ -19,6 +19,8 @@ class Part(_base):
     id = Column(Integer, Sequence('part_id_seq'), primary_key=True, nullable=False)
     config_id = Column(Integer, ForeignKey('config.id'))
     config = relationship('Config', back_populates='parts')
+    unit_id = Column(Integer, ForeignKey('unit.id'))
+    unit = relationship('Unit', back_populates='parts')
     products = relationship('Product')
     name = Column(Unicode(15))
     col = Column(Float)
@@ -100,6 +102,7 @@ class Unit(_base):
     id = Column(Integer, Sequence('unit_id_seq'), primary_key=True, nullable=False)
     name = Column(Unicode(5))
     level = Column(Integer)
+    parts = relationship('Part')
     products = relationship('Product')
     recipes_parts = relationship('Recipe_Part')
 

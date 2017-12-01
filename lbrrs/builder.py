@@ -13,6 +13,7 @@ def build(db_path, setup):
         config.setup_session(db_path)
         if setup:
             config.init()
+            return
 
         w = marketbrowser.WellcomeBrowser()
         w.direct()
