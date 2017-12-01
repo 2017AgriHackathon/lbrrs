@@ -440,6 +440,7 @@ class Directory(object):
                 db_recipe.comments = recipe.comments
                 db_recipe.trys = recipe.trys
                 db_recipe.size = recipe.size
+                db_recipe.author_id = recipe.author_id
             else:
                 session.add(recipe)
 
