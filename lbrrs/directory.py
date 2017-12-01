@@ -8,7 +8,7 @@ from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
 from . import _logging_config_path
 from .database.config import session_scope
-from .database.model import Market, Product, Config, Origin, Price, Part, Unit, Author, Recipe
+from .database.model import Market, Product, Config, Origin, Price, Part, Unit, Author, Recipe, Recipe_Part
 
 fileConfig(_logging_config_path)
 log = logging.getLogger(__name__)
@@ -406,16 +406,50 @@ class Directory(object):
     @staticmethod
     def set_author(author):
         with session_scope() as session:
-            session.add(author)
+            db_author = session.query(Author).filter(
+                Author.name == author.name
+            ).first()
+
+            if db_author:
+                db_author.fans = author.fans
+                db_author.aid = author.aid
+            else:
+                session.add(author)
 
     @staticmethod
     def set_recipe(recipe):
         with session_scope() as session:
-            session.add(recipe)
+            db_recipe = session.query(Recipe).filter(
+                Recipe.name == recipe.name
+            ).filter(
+                Recipe.url_id == recipe.url_id
+            ).first()
+
+            if db_recipe:
+                db_recipe.date = recipe.date
+                db_recipe.duration = recipe.duration
+                db_recipe.favors = recipe.favors
+                db_recipe.views = recipe.views
+                db_recipe.comments = recipe.comments
+                db_recipe.trys = recipe.trys
+                db_recipe.size = recipe.size
+            else:
+                session.add(recipe)
 
     @staticmethod
     def set_recipe_part(recipe_part):
         with session_scope() as session:
-            session.add(recipe_part)
+            db_recipe_part = session.query(Recipe_Part).filter(
+                Recipe_Part.recipe_id == recipe_part.recipe_id
+            ).filter(
+                Recipe_Part.name == recipe_part.name
+            ).first()
+
+            if db_recipe_part:
+                db_recipe_part.weight = recipe_part.weight
+                db_recipe_part.count = recipe_part.count
+                db_recipe_part.unit_id = recipe_part.unit_id
+            else:
+                session.add(recipe_part)
 
 
