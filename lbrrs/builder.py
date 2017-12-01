@@ -14,7 +14,28 @@ def build(db_path, setup):
         if setup:
             config.init()
 
-#        b = marketapi.BinJung()
+        w = marketbrowser.WellcomeBrowser()
+        w.direct()
+
+        g = marketbrowser.GeantBrowser()
+        g.direct()
+
+        f = marketbrowser.FengKangBrowser()
+        f.direct()
+
+        r1 = marketbrowser.RtmartBrowser()
+        r1.direct()
+
+        r2 = marketapi.Rtmart()
+        r2.direct()
+
+        c1 = marketapi.Carrefour()
+        c1.direct()
+
+        c2 = marketapi.CarrfourBrowser()
+        c2.direct()
+
+#       b = marketapi.BinJung()
 #       b.direct()
 
 #       n = marketapi.NewTaipeiCenter()
