@@ -101,7 +101,8 @@ def init():
             ]),
             Part(name='豬里肌肉', aliases=[
                 Alias(name='里肌'),
-                Alias(name='腰內')
+                Alias(name='腰內'),
+                Alias(name='豬腰子')
             ]),
             Part(name='豬腿肉', aliases=[
                 Alias(name='腿肉'),
@@ -163,7 +164,9 @@ def init():
             Part(name='小米'),
             Part(name='粉圓'),
             Part(name='紅棗'),
-            Part(name='芝麻'),
+            Part(name='芝麻', aliases=[
+                Alias(name='芝蔴')
+            ]),
             Part(name='西谷米'),
             Part(name='糯米'),
             Part(name='藜麥'),
@@ -226,8 +229,10 @@ def init():
             Part(name='蚵白菜', aliases=[
                 Alias(name='蚵仔白菜')
             ]),
-            Part(name='包心白菜'),
-            Part(name='大白菜'),
+            Part(name='結球白菜', aliases=[
+                Alias(name='包心白菜'),
+                Alias(name='大白菜')
+            ]),
             Part(name='娃娃菜'),
             Part(name='萵苣', aliases=[
                 Alias(name='A菜'),
@@ -322,6 +327,7 @@ def init():
             Part(name='菠菜', aliases=[
                 Alias(name='菠菱菜'),
                 Alias(name='菠薐菜'),
+                Alias(name='波菜')
             ]),
             Part(name='茼蒿'),
             Part(name='苦瓜', aliases=[
@@ -335,7 +341,8 @@ def init():
             ]),
             Part(name='山藥'),
             Part(name='花椰菜', aliases=[
-                Alias(name='青花菜')
+                Alias(name='青花菜'),
+                Alias(name='花椰')
             ]),
             Part(name='絲瓜'),
             Part(name='豆芽菜', aliases=[
@@ -414,7 +421,8 @@ def init():
             Part(name='廣島菜'),
             Part(name='竹筍'),
             Part(name='蘿美', aliases=[
-                Alias(name='蘿蔓')
+                Alias(name='蘿蔓'),
+                Alias(name='美生菜')
             ])
         ]
 
@@ -464,7 +472,8 @@ def init():
             ]),
             Part(name='金桔'),
             Part(name='藍莓'),
-            Part(name='橄欖')
+            Part(name='橄欖'),
+            Part(name='茂谷柑')
         ]
 
         normal = Config(name='常溫商品')
@@ -480,16 +489,22 @@ def init():
             Part(name='醋'),
             Part(name='糖'),
             Part(name='味霖', aliases=[
-                Alias(name='味林')
+                Alias(name='味林'),
+                Alias(name='味淋'),
+                Alias(name='味醂')
             ]),
             Part(name='水'),
 
             Part(name='白米', aliases=[
                 Alias(name='白飯')
             ]),
-            Part(name='糙米'),
+            Part(name='糙米', aliases=[
+                Alias(name='糙米飯')
+            ]),
             Part(name='黑米'),
-            Part(name='壽司米'),
+            Part(name='壽司米', aliases=[
+                Alias(name='壽司飯')
+            ]),
             Part(name='紫米'),
             Part(name='香米'),
             Part(name='胚芽米'),
@@ -498,22 +513,44 @@ def init():
                 Alias(name='綠巨人'),
                 Alias(name='玉米粒')
             ]),
+            Part(name='鮪魚罐頭', aliases=[
+                Alias(name='鮪魚')
+            ]),
+            Part(name='肉醬罐頭', aliases=[
+                Alias(name='肉醬'),
+                Alias(name='烤肉醬')
+            ]),
+            Part(name='高湯', aliases=[
+                Alias(name='湯塊')
+            ]),
             Part(name='麵粉', aliases=[
                 Alias(name='澱粉', anti=True),
                 Alias(name='低筋麵粉'),
                 Alias(name='中筋麵粉'),
                 Alias(name='高筋麵粉')
             ]),
+            Part(name='五香粉'),
             Part(name='番薯粉'),
             Part(name='太白粉'),
             Part(name='麵包粉'),
             Part(name='愛玉粉'),
             Part(name='洋菜粉'),
             Part(name='咖哩粉'),
-            Part(name='湯塊'),
             Part(name='玉米粉'),
             Part(name='鬆餅粉'),
             Part(name='薑黃粉'),
+            Part(name='茴香粉'),
+            Part(name='七味粉'),
+            Part(name='抹茶粉'),
+            Part(name='甘梅粉'),
+            Part(name='孜然粉', aliases=[
+                Alias(name='孜然')
+            ]),
+            Part(name='荳蔻粉'),
+            Part(name='可可粉', aliases=[
+                Alias(name='巧克力粉')
+            ]),
+            Part(name='雞粉'),
             Part(name='薯粉'),
             Part(name='咖哩'),
             Part(name='胡椒'),
@@ -545,7 +582,9 @@ def init():
             Part(name='胡麻醬'),
             Part(name='壽喜燒醬'),
             Part(name='鵝肝醬'),
+            Part(name='凱撒醬'),
             Part(name='辣椒醬'),
+            Part(name='老虎醬'),
             Part(name='蛋黃醬'),
             Part(name='烤肉醬'),
             Part(name='玉米醬'),
@@ -556,7 +595,10 @@ def init():
             Part(name='豆瓣醬'),
             Part(name='沙茶醬'),
             Part(name='巧克力醬'),
-            Part(name='花生醬')
+            Part(name='花生醬'),
+            Part(name='煉乳', aliases=[
+                Alias(name='煉奶')
+            ])
         ]
 
         chills = Config(name='冷藏商品')
@@ -571,10 +613,11 @@ def init():
                 Alias(name='鐵蛋', anti=True),
                 Alias(name='滷蛋', anti=True),
                 Alias(name='茶葉蛋', anti=True),
-                Alias(name='皮', anti=True),
+                Alias(name='皮蛋', anti=True),
                 Alias(name='鹹', anti=True),
                 Alias(name='奶', anti=True),
-                Alias(name='豆腐', anti=True)
+                Alias(name='豆腐', anti=True),
+                Alias(name='蛋皮')
             ]),
             Part(name='豆腐', aliases=[
                 Alias(name='凍豆腐'),
@@ -582,7 +625,9 @@ def init():
                 Alias(name='鍋', anti=True)
             ]),
             Part(name='豆皮'),
-            Part(name='味噌'),
+            Part(name='味噌', aliases=[
+                Alias(name='味增')
+            ]),
             Part(name='奶油'),
             Part(name='起司', aliases=[
                 Alias(name='乾酪'),
@@ -638,7 +683,8 @@ def init():
             Part(name='鱈'),
             Part(name='肉魚'),
             Part(name='白鯧'),
-            Part(name='秋刀魚')
+            Part(name='秋刀魚'),
+            Part(name='吻仔魚')
         ]
 
         beef = Config(name='牛肉')
@@ -658,7 +704,8 @@ def init():
             ]),
             Part(name='水餃', aliases=[
                 Alias(name='煎餃')
-            ])
+            ]),
+            Part(name='餛飩')
         ]
 
         session.add(chicken)
