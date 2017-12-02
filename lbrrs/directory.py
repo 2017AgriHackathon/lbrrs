@@ -531,13 +531,14 @@ class Directory(object):
 
             if isinstance(instance, Recipe_Part):
 
-                new_part_id = Directory.get_part(instance.name)
+                for config in configs:
 
-                if new_part_id:
+                    part_id, alias_id = Directory.classify(config, instance.name)
+                    if part_id:
 
-                    instance.part_id = new_part_id
+                        instance.part_id = part_id
 
-                    Directory.set_recipe_part(instance)
+                        Directory.set_recipe_part(instance)
 
 
 

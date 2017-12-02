@@ -43,7 +43,6 @@ def reset_parts_aliases():
         # delete config, part, alias
         session.query(Alias).delete()
         session.query(Part).delete()
-        session.query(Config).delete()
 
     init_parts_aliases()
 
@@ -315,7 +314,7 @@ def init_parts_aliases():
             ]),
             Part(name='娃娃菜'),
             Part(name='萵苣', aliases=[
-                Alias(name='A菜'),
+                Alias(name='a菜'),
                 Alias(name='大陸妹')
             ]),
             Part(name='芥藍', aliases=[
@@ -328,7 +327,7 @@ def init_parts_aliases():
             ]),
             Part(name='蔥', aliases=[
                 Alias(name='蔥頭', anti=True),
-                Alias(name='三星蔥'),
+                Alias(name='3星蔥'),
                 Alias(name='洋蔥', anti=True),
                 Alias(name='葱')
             ]),

@@ -181,7 +181,7 @@ class CarrfourBrowser(MarketApi):
                           date=self.date)
 
             product = Product(source=product_url,
-                              name=name,
+                              name=name_str,
                               market_id=self.market.id,
                               pid=pid,
                               origin=origin,
