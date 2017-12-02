@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, update
 from contextlib import contextmanager
 from . import _base, _session
-from .model import Config, Market, Part, Origin, Alias, Unit
+from .model import Config, Market, Part, Origin, Alias, Unit, Product, Recipe_Part
 
 engine = None
 
@@ -33,15 +33,14 @@ def init():
                 Alias(name='翅', anti=True),
                 Alias(name='腿', anti=True)
             ]),
-            Part(name='半雞', aliases=[
-                Alias(name='半')
-            ]),
+            Part(name='半雞'),
             Part(name='雞胸肉', aliases=[
                 Alias(name='清胸'),
                 Alias(name='雞胸'),
                 Alias(name='清雞胸'),
                 Alias(name='清雞胸肉'),
-                Alias(name='胸肉')
+                Alias(name='胸肉'),
+                Alias(name='骨', anti=True)
             ]),
             Part(name='雞里肌肉', aliases=[
                 Alias(name='里肌')
@@ -110,7 +109,7 @@ def init():
             ]),
             Part(name='豬腿肉', aliases=[
                 Alias(name='腿肉'),
-                Alias(name='腿'),
+                Alias(name='豬腿'),
                 Alias(name='腱子'),
                 Alias(name='豬蹄膀')
             ]),
@@ -568,9 +567,13 @@ def init():
             Part(name='吉利丁'),
             Part(name='果凍粉'),
             Part(name='豆蔻粉'),
+            Part(name='胡椒粉', aliases=[
+                Alias(name='醬', anti=True),
+                Alias(name='胡椒')
+            ]),
+            Part(name='胡椒粒'),
             Part(name='酵母粉', aliases=[
                 Alias(name='酵母')
-
             ]),
             Part(name='孜然粉', aliases=[
                 Alias(name='孜然')
@@ -585,7 +588,6 @@ def init():
             Part(name='雞粉'),
             Part(name='薯粉'),
             Part(name='咖哩'),
-            Part(name='胡椒'),
             Part(name='砂糖'),
             Part(name='麵條', aliases=[
                 Alias(name='細麵')
@@ -854,6 +856,31 @@ def init():
         session.add(u22)
         session.add(u23)
         session.add(u31)
+
+
+def reset_configs():
+    print('reset configs...')
+
+    with session_scope() as session:
+        # reset foreign key from product, recipe_part
+        session.execute(update(Product, values={Product.part_id: None}))
+        session.execute(update(Product, values={Product.alias_id: None}))
+        session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
+
+        # reset foreign key from part
+        session.execute(update(Part, values={Part.unit_id: None}))
+
+        # drop config, part, alias
+        _base.metadata.tables['alias'].drop(engine)
+        _base.metadata.tables['part'].drop(engine)
+        _base.metadata.tables['config'].drop(engine)
+
+        # re-create
+        _base.metadata.tables['alias'].create(engine)
+        _base.metadata.tables['part'].create(engine)
+        _base.metadata.tables['config'].create(engine)
+
+        # re-classify
 
 
 @contextmanager

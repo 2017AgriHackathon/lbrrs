@@ -8,11 +8,15 @@ from .directory import Directory
 from . import marketbrowser, marketapi
 
 
-def build(db_path, setup):
+def build(db_path, setup, reset):
     if db_path:
         config.setup_session(db_path)
         if setup:
             config.init()
+            return
+
+        if reset:
+            config.reset_configs()
             return
 
         w = marketbrowser.WellcomeBrowser()
@@ -49,12 +53,13 @@ def parse_args(args):
     parser = ArgumentParser()
     parser.add_argument('--dbpath', help='sql connection here.', required=True)
     parser.add_argument('--setup', help='present to initialize database.', action='store_true')
+    parser.add_argument('--reset', help='reset configs and re-classify.', action='store_true')
     return parser.parse_args()
 
 
 def main(args):
     args = parse_args(args)
-    build(args.dbpath, args.setup)
+    build(args.dbpath, args.setup, args.reset)
 
 
 if __name__ == '__main__':
