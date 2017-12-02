@@ -24,12 +24,73 @@ def init():
     init_origins()
     init_market()
     init_configs()
+    init_parts_aliases()
 
+
+def reset_parts_aliases():
+    print('reset configs...')
+
+    with session_scope() as session:
+        # reset foreign key from product, recipe_part
+        session.execute(update(Product, values={Product.config_id: None,
+                                                Product.part_id: None,
+                                                Product.alias_id: None}))
+        session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
+
+        # reset foreign key from part
+        session.execute(update(Part, values={Part.unit_id: None}))
+
+        # delete config, part, alias
+        session.query(Alias).delete()
+        session.query(Part).delete()
+        session.query(Config).delete()
+
+    init_parts_aliases()
 
 def init_configs():
+
     with session_scope() as session:
 
         chicken = Config(name='雞肉')
+
+        pork = Config(name='豬肉')
+
+        groceries = Config(name='雜貨')
+
+        veg = Config(name='蔬菜')
+
+        fruit = Config(name='水果')
+
+        normal = Config(name='常溫商品')
+
+        chills = Config(name='冷藏商品')
+
+        seafood = Config(name='海鮮')
+
+        beef = Config(name='牛肉')
+
+        goat = Config(name='羊肉')
+
+        freezings = Config(name='冷凍商品')
+
+        session.add(chicken)
+        session.add(pork)
+        session.add(groceries)
+        session.add(veg)
+        session.add(fruit)
+        session.add(normal)
+        session.add(chills)
+        session.add(seafood)
+        session.add(beef)
+        session.add(goat)
+        session.add(freezings)
+
+
+def init_parts_aliases():
+
+    with session_scope() as session:
+
+        chicken = session.query(Config).filter(Config.name == '雞肉').first()
         chicken.parts = [
             Part(name='全雞', aliases=[
                 Alias(name='土雞'),
@@ -88,7 +149,7 @@ def init_configs():
             Part(name='雞胗')
         ]
 
-        pork = Config(name='豬肉')
+        pork = session.query(Config).filter(Config.name == '豬肉').first()
         pork.parts = [
             Part(name='豬腹脇肉', aliases=[
                 Alias(name='五花'),
@@ -149,7 +210,7 @@ def init_configs():
             Part(name='豬心')
         ]
 
-        groceries = Config(name='雜貨')
+        groceries = session.query(Config).filter(Config.name == '雜貨').first()
         groceries.parts = [
             Part(name='紅豆', aliases=[
                 Alias(name='豆仁', anti=True),
@@ -218,7 +279,7 @@ def init_configs():
             Part(name='決明子')
         ]
 
-        veg = Config(name='蔬菜')
+        veg = session.query(Config).filter(Config.name == '蔬菜').first()
         veg.parts = [
             Part(name='玉米筍'),
             Part(name='薑'),
@@ -443,7 +504,7 @@ def init_configs():
             ])
         ]
 
-        fruit = Config(name='水果')
+        fruit = session.query(Config).filter(Config.name == '水果').first()
         fruit.parts = [
             Part(name='芭樂', aliases=[
                 Alias(name='番石榴')
@@ -497,7 +558,7 @@ def init_configs():
             Part(name='柳橙')
         ]
 
-        normal = Config(name='常溫商品')
+        normal = session.query(Config).filter(Config.name == '常溫商品').first()
         normal.parts = [
             Part(name='砂糖'),
             Part(name='冰糖'),
@@ -536,7 +597,6 @@ def init_configs():
             Part(name='高湯', aliases=[
                 Alias(name='湯塊')
             ]),
-            Part(name='泡菜'),
             Part(name='脆瓜'),
             Part(name='紅燒鰻'),
             Part(name='鯖魚罐頭', aliases=[
@@ -568,6 +628,7 @@ def init_configs():
             Part(name='抹茶粉'),
             Part(name='甘梅粉'),
             Part(name='椰子粉'),
+            Part(name='布丁粉'),
             Part(name='肉桂粉'),
             Part(name='鰹魚粉'),
             Part(name='泡打粉'),
@@ -607,7 +668,9 @@ def init_configs():
             Part(name='烏龍麵'),
             Part(name='拉麵'),
             Part(name='義大利麵', aliases=[
-                Alias(name='意大利面')
+                Alias(name='意大利面'),
+                Alias(name='醬', anti=True),
+                Alias(name='義大利直麵')
             ]),
             Part(name='通心粉'),
             Part(name='筆管麵'),
@@ -616,17 +679,26 @@ def init_configs():
             Part(name='水粉'),
             Part(name='粉絲'),
             Part(name='寬粉'),
-            Part(name='番茄醬'),
+            Part(name='番茄醬', aliases=[
+                Alias(name='蕃茄醬')
+            ]),
             Part(name='甜辣醬'),
-            Part(name='醬油膏'),
+            Part(name='xo醬'),
+            Part(name='醬油膏', aliases=[
+                Alias(name='油膏')
+            ]),
             Part(name='豆瓣醬', aliases=[
                 Alias(name='豆瓣')
             ]),
+            Part(name='蠔油'),
             Part(name='醬油'),
             Part(name='辣醬'),
             Part(name='烤肉醬'),
-            Part(name='芥末醬'),
+            Part(name='芥末', aliases=[
+                Alias(name='山葵醬')
+            ]),
             Part(name='咖哩醬'),
+            Part(name='洋蔥醬'),
             Part(name='胡麻醬'),
             Part(name='壽喜燒醬'),
             Part(name='鵝肝醬'),
@@ -638,6 +710,7 @@ def init_configs():
             Part(name='玉米醬'),
             Part(name='卡士達醬'),
             Part(name='義大利麵醬'),
+            Part(name='牛排醬'),
             Part(name='紅醬'),
             Part(name='白醬'),
             Part(name='炸醬'),
@@ -646,22 +719,37 @@ def init_configs():
             ]),
             Part(name='甜雞醬'),
             Part(name='巧克力醬', aliases=[
-                Alias(name='朱古力粉')
+                Alias(name='朱古力粉'),
+                Alias(name='可可醬')
             ]),
             Part(name='花生醬'),
             Part(name='千島醬'),
-            Part(name='蔓越莓醬'),
+            Part(name='蔓越莓醬', aliases=[
+                Alias(name='藍莓果醬')
+            ]),
+            Part(name='草莓醬', aliases=[
+                Alias(name='草莓果醬')
+            ]),
+            Part(name='藍莓醬', aliases=[
+                Alias(name='藍莓果醬')
+            ]),
+            Part(name='芒果醬', aliases=[
+                Alias(name='芒果果醬')
+            ]),
+            Part(name='迷迭香'),
+            Part(name='滷包', aliases=[
+                Alias(name='滷味包')
+            ]),
+            Part(name='香鬆'),
+            Part(name='蜂蜜'),
             Part(name='煉乳', aliases=[
                 Alias(name='煉奶')
             ]),
-            Part(name='迷迭香'),
-            Part(name='滷包'),
-            Part(name='香鬆'),
-            Part(name='蜂蜜')
-
+            Part(name='泡菜'),
+            Part(name='豆腐乳')
         ]
 
-        chills = Config(name='冷藏商品')
+        chills = session.query(Config).filter(Config.name == '冷藏商品').first()
         chills.parts = [
             Part(name='鮮乳', aliases=[
                 Alias(name='鮮奶'),
@@ -719,7 +807,7 @@ def init_configs():
             Part(name='蒟蒻')
         ]
 
-        seafood = Config(name='海鮮')
+        seafood = session.query(Config).filter(Config.name == '海鮮').first()
         seafood.parts = [
             Part(name='蝦', aliases=[
                 Alias(name='沙拉', anti=True)
@@ -749,6 +837,20 @@ def init_configs():
             Part(name='柳葉魚'),
             Part(name='鯛魚'),
             Part(name='竹莢魚'),
+            Part(name='鯧'),
+            Part(name='烏魚', aliases=[
+                Alias(name='烏魚子', anti=True)
+            ]),
+            Part(name='烏魚子'),
+            Part(name='白帶魚'),
+            Part(name='多利魚'),
+            Part(name='紅魚'),
+            Part(name='吳郭魚'),
+            Part(name='草魚'),
+            Part(name='旗魚'),
+            Part(name='鰻', aliases=[
+                Alias(name='紅燒', anti=True)
+            ]),
             Part(name='鱈'),
             Part(name='肉魚'),
             Part(name='白鯧'),
@@ -756,43 +858,46 @@ def init_configs():
             Part(name='吻仔魚'),
             Part(name='黃魚'),
             Part(name='丁香魚'),
-            Part(name='牡蠣')
+            Part(name='牡蠣'),
+            Part(name='蟳'),
+            Part(name='扇貝'),
+            Part(name='帆立貝'),
+            Part(name='蟳'),
+            Part(name='鮑魚', aliases=[
+                Alias(name='沙拉', anti=True),
+                Alias(name='鮑片')
+            ]),
+            Part(name='龍蝦', aliases=[
+                Alias(name='沙拉', anti=True)
+            ]),
+            Part(name='泡菜')
         ]
 
-        beef = Config(name='牛肉')
+        beef = session.query(Config).filter(Config.name == '牛肉').first()
         beef.parts = [
             Part(name='牛')
         ]
 
-        goat = Config(name='羊肉')
+        goat = session.query(Config).filter(Config.name == '羊肉').first()
         goat.parts = [
             Part(name='羊')
         ]
 
-        freezings = Config(name='冷凍商品')
+        freezings = session.query(Config).filter(Config.name == '冷凍商品').first()
         freezings.parts = [
             Part(name='冰', aliases=[
                 Alias(name='冰淇淋')
             ]),
             Part(name='水餃', aliases=[
-                Alias(name='煎餃')
+                Alias(name='煎餃'),
+                Alias(name='餃子')
             ]),
-            Part(name='餛飩'),
+            Part(name='餛飩', aliases=[
+                Alias(name='雲吞')
+            ]),
             Part(name='貢丸'),
             Part(name='魚丸')
         ]
-
-        session.add(chicken)
-        session.add(pork)
-        session.add(groceries)
-        session.add(veg)
-        session.add(fruit)
-        session.add(normal)
-        session.add(chills)
-        session.add(seafood)
-        session.add(beef)
-        session.add(goat)
-        session.add(freezings)
 
 
 def init_market():
@@ -879,27 +984,6 @@ def init_units():
         session.add(u22)
         session.add(u23)
         session.add(u31)
-
-
-def reset_configs():
-    print('reset configs...')
-
-    with session_scope() as session:
-        # reset foreign key from product, recipe_part
-        session.execute(update(Product, values={Product.config_id: None,
-                                                Product.part_id: None,
-                                                Product.alias_id: None}))
-        session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
-
-        # reset foreign key from part
-        session.execute(update(Part, values={Part.unit_id: None}))
-
-        # delete config, part, alias
-        session.query(Alias).delete()
-        session.query(Part).delete()
-        session.query(Config).delete()
-
-    init_configs()
 
 
 @contextmanager

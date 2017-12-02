@@ -20,7 +20,7 @@ def build(db_path, setup, reclassify):
             products = Directory.get_products()
             recipe_parts = Directory.get_recipe_parts()
 
-            config.reset_configs()
+            config.reset_parts_aliases()
 
             Directory.re_classify(products)
             Directory.re_classify(recipe_parts)
