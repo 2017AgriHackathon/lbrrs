@@ -20,6 +20,13 @@ def init():
     _base.metadata.drop_all(engine)
     _base.metadata.create_all(engine)
 
+    init_units()
+    init_origins()
+    init_market()
+    init_configs()
+
+
+def init_configs():
     with session_scope() as session:
 
         chicken = Config(name='雞肉')
@@ -786,6 +793,11 @@ def init():
         session.add(goat)
         session.add(freezings)
 
+
+def init_market():
+
+    with session_scope() as session:
+
         g = Market(name='愛買')
         w = Market(name='頂好')
         r = Market(name='大潤發')
@@ -802,6 +814,11 @@ def init():
         session.add(b)
         session.add(n)
 
+
+def init_origins():
+
+    with session_scope() as session:
+
         tw = Origin(name='臺灣')
         au = Origin(name='澳洲')
         us = Origin(name='美國')
@@ -817,6 +834,11 @@ def init():
         session.add(jp)
         session.add(kr)
         session.add(other)
+
+
+def init_units():
+
+    with session_scope() as session:
 
         u101 = Unit(name='根', level=1)
         u102 = Unit(name='粒', level=1)
@@ -880,7 +902,7 @@ def reset_configs():
         _base.metadata.tables['part'].create(engine)
         _base.metadata.tables['config'].create(engine)
 
-        # re-classify
+        init_configs()
 
 
 @contextmanager

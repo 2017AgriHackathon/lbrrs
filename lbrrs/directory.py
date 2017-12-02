@@ -133,17 +133,30 @@ class Directory(object):
     def __init__(self):
 
         self.date = datetime.date.today().strftime('%Y-%m-%d')
-
+        self.configs = Directory.get_configs()
+        self.units = Directory.get_units()
         with session_scope() as session:
-            self.configs = session.query(Config).options(
-                subqueryload(Config.parts).subqueryload(Part.aliases)
-            ).all()
-            self.units = session.query(Unit).order_by(Unit.level.desc()).all()
 
             if self.PRODUCT_MAP and self.NAME:
                 self.market = session.query(Market).filter(Market.name == self.NAME).first()
 
             session.expunge_all()
+
+    @staticmethod
+    def get_configs():
+        with session_scope() as session:
+            configs = session.query(Config).options(
+                subqueryload(Config.parts).subqueryload(Part.aliases)
+            ).all()
+            session.expunge_all()
+            return configs
+
+    @staticmethod
+    def get_units():
+        with session_scope() as session:
+            units = session.query(Unit).order_by(Unit.level.desc()).all()
+            session.expunge_all()
+            return units
 
     @staticmethod
     def normalize(s):
@@ -226,15 +239,29 @@ class Directory(object):
 
     @staticmethod
     def set_product(product):
+
         with session_scope() as session:
-            session.add(product)
+            db_product = session.query(Product).filter(
+                Product.market_id == product.market_id
+            ).filter(
+                Product.pid == product.pid
+            ).first()
+
+            if db_product:
+                db_product.part_id = product.part_id
+                db_product.alias_id = product.alias_id
+                db_product.weight = product.weight
+                db_product.count = product.count
+                db_product.unit_id = product.unit_id
+            else:
+                session.add(product)
 
     @classmethod
-    def get_count(cls, s):
+    def get_count(cls, count_str):
 
-        s = cls.normalize(s)
+        count_str = cls.normalize(count_str)
 
-        counts = cls.MULTI_RE.findall(s)
+        counts = cls.MULTI_RE.findall(count_str)
 
         def is_int(s):
             try:
@@ -254,8 +281,8 @@ class Directory(object):
     @classmethod
     def get_weight(cls, s):
 
-        def convert_frac(frac_str):
-            num, denom = frac_str.split('/')
+        def convert(s):
+            num, denom = s.split('/')
             return float(num) / float(denom)
 
         s = cls.normalize(s)
@@ -272,7 +299,7 @@ class Directory(object):
                     unit_value = token[index]
                     if unit_value:
                         if '/' in unit_value:
-                            unit_value = convert_frac(unit_value)
+                            unit_value = convert(unit_value)
                         try:
                             unit_value = float(unit_value)
                         except ValueError:
@@ -459,5 +486,56 @@ class Directory(object):
                 db_recipe_part.unit_id = recipe_part.unit_id
             else:
                 session.add(recipe_part)
+
+    '''Withdraw all products before reset configs to 
+    recognize each product belongs to which config'''
+    @staticmethod
+    def get_products():
+        with session_scope() as session:
+            products = session.query(Product).options(
+                subqueryload(Product.part).subqueryload(Part.config)
+            ).all()
+            session.expunge_all()
+            return products
+
+    @staticmethod
+    def get_recipe_parts():
+        with session_scope() as session:
+            recipe_parts = session.query(Recipe_Part).all()
+            session.expunge_all()
+            return recipe_parts
+
+    @staticmethod
+    def re_classify(instances):
+
+        # get configs after resetting
+        configs = Directory.get_configs()
+
+        for instance in instances:
+
+            if isinstance(instance, Product):
+
+                config_name = Product.part.config.name
+
+                for config in configs:
+                    if config.name == config_name:
+                        instance = Directory.classify_product_auto(config, instance)
+
+                        if instance.part_id:
+                            Directory.set_product(instance)
+
+            if isinstance(instance, Recipe_Part):
+
+                new_part_id = Directory.get_part(instance.name)
+
+                if new_part_id:
+
+                    instance.part_id = new_part_id
+
+                    Directory.set_recipe_part(instance)
+
+
+
+
 
 
