@@ -887,7 +887,7 @@ def reset_configs():
     with session_scope() as session:
         # reset foreign key from product, recipe_part
         session.execute(update(Product, values={Product.config_id: None,
-                                                Product.part_id:None,
+                                                Product.part_id: None,
                                                 Product.alias_id: None}))
         session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
 

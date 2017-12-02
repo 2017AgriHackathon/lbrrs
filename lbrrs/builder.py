@@ -61,7 +61,7 @@ def parse_args(args):
     parser = ArgumentParser()
     parser.add_argument('--dbpath', help='sql connection here.', required=True)
     parser.add_argument('--setup', help='present to initialize database.', action='store_true')
-    parser.add_argument('--reclassify', help='reset configs and re-classify.', action='store_true')
+    parser.add_argument('--reclassify', help='present to reset configs then do re-classify.', action='store_true')
     return parser.parse_args()
 
 
