@@ -326,6 +326,7 @@ class Directory(object):
                 if alias.name in s and alias.anti:
                     find = False
             if find:
+                log.info(Directory.INFO_MAP[4] % (s, part.name))
                 return part.id, find_alias_id
 
         return None, None
@@ -335,7 +336,6 @@ class Directory(object):
         part_id, alias_id = Directory.classify(config, product.name)
         if part_id:
             product.part_id = part_id
-            log.info(Directory.INFO_MAP[4] % (product.name, part_id))
         if alias_id:
             product.alias_id = alias_id
         return product
@@ -493,7 +493,7 @@ class Directory(object):
     def get_products():
         with session_scope() as session:
             products = session.query(Product).options(
-                subqueryload(Product.part).subqueryload(Part.config)
+                subqueryload(Product.config)
             ).all()
             session.expunge_all()
             return products
@@ -515,10 +515,15 @@ class Directory(object):
 
             if isinstance(instance, Product):
 
-                config_name = Product.part.config.name
+                config_name = instance.config.name
 
                 for config in configs:
+
                     if config.name == config_name:
+
+                        # set config_id for future re-classify
+                        instance.config_id = config.id
+
                         instance = Directory.classify_product_auto(config, instance)
 
                         if instance.part_id:

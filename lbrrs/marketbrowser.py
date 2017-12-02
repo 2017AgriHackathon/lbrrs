@@ -51,8 +51,13 @@ class MarketBrowser(Directory):
             product, price = self.get_product_price(url)
             if not product and not price:
                 return
+
+            # set config_id for future re-classify
+            product.config_id = config.id
+
             # return self if not exists
             product = self.check_product(product)
+
             if not product.id:
                 Directory.STACK.append((config, product, price))
             elif product.part_id:

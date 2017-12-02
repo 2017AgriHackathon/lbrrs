@@ -12,6 +12,7 @@ class Config(_base):
     id = Column(Integer, Sequence('config_id_seq'), primary_key=True, nullable=False)
     name = Column(Unicode(5))
     parts = relationship('Part')
+    products = relationship('Product')
 
 
 class Part(_base):
@@ -123,6 +124,8 @@ class Unit(_base):
 class Product(_base):
     __tablename__ = 'product'
     id = Column(Integer, Sequence('product_id_seq'), primary_key=True, nullable=False)
+    config_id = Column(Integer, ForeignKey('config.id'))
+    config = relationship('Config', back_populates='products')
     part_id = Column(Integer, ForeignKey('part.id'))
     part = relationship('Part', back_populates='products')
     market_id = Column(Integer, ForeignKey('market.id'))

@@ -17,7 +17,7 @@ def setup_session(db_path):
 
 def init():
     print('initializing database...')
-    _base.metadata.drop_all(engine)
+#   _base.metadata.drop_all(engine)
     _base.metadata.create_all(engine)
 
     init_units()
@@ -656,7 +656,8 @@ def init_configs():
             ]),
             Part(name='迷迭香'),
             Part(name='滷包'),
-            Part(name='香鬆')
+            Part(name='香鬆'),
+            Part(name='蜂蜜')
 
         ]
 
@@ -885,24 +886,20 @@ def reset_configs():
 
     with session_scope() as session:
         # reset foreign key from product, recipe_part
-        session.execute(update(Product, values={Product.part_id: None}))
-        session.execute(update(Product, values={Product.alias_id: None}))
+        session.execute(update(Product, values={Product.config_id: None,
+                                                Product.part_id:None,
+                                                Product.alias_id: None}))
         session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
 
         # reset foreign key from part
         session.execute(update(Part, values={Part.unit_id: None}))
 
-        # drop config, part, alias
-        _base.metadata.tables['alias'].drop(engine)
-        _base.metadata.tables['part'].drop(engine)
-        _base.metadata.tables['config'].drop(engine)
+        # delete config, part, alias
+        session.query(Alias).delete()
+        session.query(Part).delete()
+        session.query(Config).delete()
 
-        # re-create
-        _base.metadata.tables['alias'].create(engine)
-        _base.metadata.tables['part'].create(engine)
-        _base.metadata.tables['config'].create(engine)
-
-        init_configs()
+    init_configs()
 
 
 @contextmanager
