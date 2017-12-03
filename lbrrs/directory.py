@@ -504,7 +504,7 @@ class Directory(object):
     @staticmethod
     def get_recipe_parts():
         with session_scope() as session:
-            recipe_parts = session.query(Recipe_Part).filter(Recipe_Part.id > 200000).all()
+            recipe_parts = session.query(Recipe_Part).filter(Recipe_Part.part_id.is_(None)).all()
             session.expunge_all()
             return recipe_parts
 
