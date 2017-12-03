@@ -6,6 +6,8 @@ import re
 import logging
 from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
+from pathos.pools import _ThreadPool
+from pathos.multiprocessing import cpu_count
 from . import _logging_config_path
 from .database.config import session_scope
 from .database.model import Market, Product, Config, Origin, Price, Part, Unit, Author, Recipe, Recipe_Part
@@ -484,6 +486,7 @@ class Directory(object):
                 db_recipe_part.weight = recipe_part.weight
                 db_recipe_part.count = recipe_part.count
                 db_recipe_part.unit_id = recipe_part.unit_id
+                db_recipe_part.part_id = recipe_part.part_id
             else:
                 session.add(recipe_part)
 
@@ -501,12 +504,24 @@ class Directory(object):
     @staticmethod
     def get_recipe_parts():
         with session_scope() as session:
-            recipe_parts = session.query(Recipe_Part).all()
+            recipe_parts = session.query(Recipe_Part).filter(Recipe_Part.part_id is None).filter(Recipe_Part.id > 200000).all()
             session.expunge_all()
             return recipe_parts
 
     @staticmethod
     def re_classify(instances):
+
+        cpu = cpu_count()
+        pool = _ThreadPool(cpu)
+
+        def classify_recipe_part(c, i):
+
+            part_id, alias_id = Directory.classify(c, i.name)
+
+            if part_id:
+                i.part_id = part_id
+
+                Directory.set_recipe_part(i)
 
         # get configs after resetting
         configs = Directory.get_configs()
@@ -533,12 +548,12 @@ class Directory(object):
 
                 for config in configs:
 
-                    part_id, alias_id = Directory.classify(config, instance.name)
-                    if part_id:
+                    pool.apply_async(classify_recipe_part, args=(config, instance))
 
-                        instance.part_id = part_id
+        pool.close()
+        pool.join()
 
-                        Directory.set_recipe_part(instance)
+
 
 
 

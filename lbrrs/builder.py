@@ -17,12 +17,12 @@ def build(db_path, setup, reclassify):
 
         if reclassify:
             # withdraw all product & recipe_part
-            products = Directory.get_products()
+            #products = Directory.get_products()
             recipe_parts = Directory.get_recipe_parts()
 
-            config.reset_parts_aliases()
+#           config.reset_parts_aliases()
 
-            Directory.re_classify(products)
+            #Directory.re_classify(products)
             Directory.re_classify(recipe_parts)
             return
 
@@ -46,7 +46,6 @@ def build(db_path, setup, reclassify):
 
         c2 = marketapi.CarrfourBrowser()
         c2.direct()
-
 
 #       b = marketapi.BinJung()
 #       b.direct()
