@@ -124,7 +124,7 @@ class WellcomeBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-            (?:.+?)(?=[\d])
+            (?:.+?)(?=[0-9]+)
     ''', re.X)
 
     def __init__(self):
@@ -242,7 +242,7 @@ class GeantBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-        (?:.+?)(?=\d+.*|$)
+        (?:.+?)(?=\[0-9]+.*|$)
     ''', re.X)
 
     ORIGIN_RE = re.compile('''
@@ -341,7 +341,7 @@ class GeantBrowser(MarketBrowser):
             return None, None
 
         product = Product(source=url,
-                          name=name,
+                          name=name_str,
                           origin=origin,
                           market_id=self.market.id,
                           pid=pid,
@@ -399,7 +399,7 @@ class FengKangBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-        (?:.+?)(?=\d+.*|約.*|\W+.*|$)
+        (?:.+?)(?=[0-9]+.*|約.*|$)
     ''', re.X)
 
     PID_RE = re.compile('''
@@ -527,7 +527,7 @@ class RtmartBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-        (?:.+?)(?=\d+.*|\(約+.*|$)
+        (?:.+?)(?=[0-9]+.*|\(約+.*|$)
     ''', re.X)
 
     ORIGIN_RE = re.compile('''
@@ -613,7 +613,7 @@ class RtmartBrowser(MarketBrowser):
             return None, None
 
         product = Product(source=url,
-                          name=name, origin=origin,
+                          name=name_str, origin=origin,
                           market_id=self.market.id,
                           pid=pid,
                           weight=weight,

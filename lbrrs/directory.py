@@ -250,6 +250,7 @@ class Directory(object):
             ).first()
 
             if db_product:
+                db_product.name = product.name
                 db_product.part_id = product.part_id
                 db_product.alias_id = product.alias_id
                 db_product.weight = product.weight
@@ -504,7 +505,7 @@ class Directory(object):
     @staticmethod
     def get_recipe_parts():
         with session_scope() as session:
-            recipe_parts = session.query(Recipe_Part).filter(Recipe_Part.part_id.is_(None)).all()
+            recipe_parts = session.query(Recipe_Part).all()
             session.expunge_all()
             return recipe_parts
 
