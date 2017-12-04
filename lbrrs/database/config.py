@@ -598,7 +598,8 @@ def init_parts_aliases():
                 Alias(name='無洗米'),
                 Alias(name='好米'),
                 Alias(name='優質米'),
-                Alias(name='履歷米')
+                Alias(name='履歷米'),
+                Alias(name='隔夜飯')
             ]),
             Part(name='糙米', aliases=[
                 Alias(name='糙米飯')
@@ -612,7 +613,9 @@ def init_parts_aliases():
             Part(name='香米'),
             Part(name='越光米'),
             Part(name='胚芽米'),
-            Part(name='穀米'),
+            Part(name='穀米', aliases=[
+                Alias(name='五穀飯')
+            ]),
             Part(name='玉米罐頭', aliases=[
                 Alias(name='綠巨人'),
                 Alias(name='玉米粒')

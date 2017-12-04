@@ -242,7 +242,7 @@ class GeantBrowser(MarketBrowser):
     }
 
     NAME_RE = re.compile('''
-        (?:.+?)(?=\[0-9]+.*|$)
+        (?:.+?)(?=[0-9]+.*|$)
     ''', re.X)
 
     ORIGIN_RE = re.compile('''
