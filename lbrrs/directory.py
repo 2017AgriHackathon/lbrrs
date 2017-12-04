@@ -18,10 +18,10 @@ log = logging.getLogger(__name__)
 
 
 class Directory(object):
-    """initialize with class attribute NAME and loads instance
-    attribute from sqlalchemy, as a database entry also provides
-    basic text parsing settings"""
-
+    """Initialize with class attribute NAME and loads instance
+    attribute from database, as a db entry also provides
+    basic text parsing methods
+    """
     NAME = None
 
     PRODUCT_MAP = None
@@ -247,12 +247,15 @@ class Directory(object):
         find_alias_id = None
 
         for part in config.parts:
+
             if part.name in s:
                 find = True
+
             for alias in part.aliases:
                 if alias.name in s and not alias.anti:
                     find_alias_id = alias.id
                     find = True
+
             for alias in part.aliases:
 
                 if alias.name in s and alias.anti:

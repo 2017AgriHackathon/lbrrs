@@ -31,19 +31,20 @@ def reset_parts_aliases():
     print('reset configs...')
 
     with session_scope() as session:
-        # reset foreign key from product, recipe_part
+        # Reset foreign key from product, recipe_part
         session.execute(update(Product, values={Product.config_id: None,
                                                 Product.part_id: None,
                                                 Product.alias_id: None}))
         session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
 
-        # reset foreign key from part
+        # Reset foreign key from part
         session.execute(update(Part, values={Part.unit_id: None}))
 
-        # delete config, part, alias
+        # Delete parts, aliases
         session.query(Alias).delete()
         session.query(Part).delete()
 
+    # Re-initialize parts & aliases
     init_parts_aliases()
 
 
