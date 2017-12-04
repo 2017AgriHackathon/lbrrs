@@ -184,29 +184,6 @@ class Directory(object):
         return None
 
     @classmethod
-    def clear_stack(cls):
-
-        def set_product_price(pd, pc):
-
-            pc.product = pd
-            Directory.set_price(pc)
-
-#       manuals = []
-
-        for config, product, price in cls.STACK:
-            product = Directory.classify_product_auto(config, product)
-#           if product.part_id:
-            set_product_price(product, price)
-#           else:
-#               manuals.append((config, product, price))
-
-#       for config, product, price in manuals:
-#           product = Directory.classify_product_manual(config, product)
-#           set_product_price(product, price)
-
-        cls.STACK = []
-
-    @classmethod
     def get_count(cls, count_str):
 
         count_str = cls.normalize(count_str)
@@ -334,6 +311,37 @@ class Directory(object):
                     log.info(Directory.INFO_MAP[2] % (product.name, config.parts[i].name))
                     break
         return product
+
+    @classmethod
+    def clear_stack(cls):
+
+        cpu = cpu_count()
+        pool = _ThreadPool(cpu)
+
+        def classify_set(c, pd, pc):
+
+            pd = Directory.classify_product_auto(config, pd)
+#           if product.part_id:
+            pc.product = pd
+            Directory.set_price(pc)
+#           else:
+#               manuals.append((config, product, price))
+
+#       manuals = []
+
+        for config, product, price in cls.STACK:
+
+            pool.apply_async(classify_set, args=(config, product, price))
+
+#       for config, product, price in manuals:
+#           product = Directory.classify_product_manual(config, product)
+#           if product.part_id:
+#               price.product = product
+#               Directory.set_price(price)
+#           else:
+#               Directory.set_product(product)
+
+        cls.STACK = []
 
     @staticmethod
     def re_classify(instances):
