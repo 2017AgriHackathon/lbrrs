@@ -8,7 +8,7 @@ import logging
 import re
 from lxml import html
 from logging.config import fileConfig
-from pathos.pools import _ThreadPool
+from pathos.pools import _ThreadPool as Pool
 from pathos.multiprocessing import cpu_count
 from . import _logging_config_path
 from .database.model import Product, Price
@@ -64,7 +64,7 @@ class MarketApi(Directory):
                 log.error(Directory.ERROR_MAP[1] % config.name)
 
         cpu = cpu_count()
-        pool = _ThreadPool(cpu)
+        pool = Pool(cpu)
         for c in self.configs:
             pool.apply_async(browse_each, args=(c, ))
         pool.close()

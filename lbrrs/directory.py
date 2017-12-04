@@ -7,7 +7,7 @@ import logging
 import regex
 from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
-from pathos.pools import _ThreadPool
+from pathos.pools import _ThreadPool as Pool
 from pathos.multiprocessing import cpu_count
 from . import _logging_config_path
 from .database.config import session_scope
@@ -175,14 +175,6 @@ class Directory(object):
 
         return s.lower()
 
-    def get_unit(self, unit_str):
-
-        for unit in self.units:
-            if unit.name in unit_str:
-                return unit
-
-        return None
-
     @classmethod
     def get_count(cls, count_str):
 
@@ -209,33 +201,40 @@ class Directory(object):
     def get_weight(cls, s):
 
         def convert(s):
-            num, denom = s.split('/')
-            return float(num) / float(denom)
+            n, d = s.split('/')
+            return float(n) / float(d)
 
         s = cls.normalize(s)
 
         s = re.sub('半', '0.5', s)
         s = re.sub('數', '3', s)
 
-        try:
+        tokens = cls.UNIT_RE.findall(s)
 
-            tokens = cls.UNIT_RE.findall(s)
-
-            for token in tokens:
-                for index, multiplier in enumerate(cls.UNIT_SET):
-                    unit_value = token[index]
-                    if unit_value:
-                        if '/' in unit_value:
-                            unit_value = convert(unit_value)
-                        try:
-                            unit_value = float(unit_value)
-                        except ValueError:
-                            log.error(Directory.ERROR_MAP[0])
-                            return None
-                        # 120g => 120 * 1 * 3
+        for token in tokens:
+            for index, multiplier in enumerate(cls.UNIT_SET):
+                unit_value = token[index]
+                if unit_value:
+                    if '/' in unit_value:
+                        unit_value = convert(unit_value)
+                    try:
+                        unit_value = float(unit_value)
+                    except ValueError:
+                        log.error(Directory.ERROR_MAP[0])
+                        return None
+                    # 120g => 120 * 1 * 3
+                    try:
                         return unit_value * multiplier
-        except:
-            return None
+                    except:
+                        return None
+
+    def get_unit(self, unit_str):
+
+        for unit in self.units:
+            if unit.name in unit_str:
+                return unit
+
+        return None
 
     @staticmethod
     def classify(config, s):
@@ -319,7 +318,7 @@ class Directory(object):
     def clear_stack(cls):
 
         cpu = cpu_count()
-        pool = _ThreadPool(cpu)
+        pool = Pool(cpu)
 
         def classify_set(c, pd, pc):
 
@@ -350,7 +349,7 @@ class Directory(object):
     def re_classify(instances):
 
         cpu = cpu_count()
-        pool = _ThreadPool(cpu)
+        pool = Pool(cpu)
 
         def classify_recipe_part(c, i):
 
@@ -365,12 +364,12 @@ class Directory(object):
 
             i = Directory.classify_product_auto(c, i)
 
-            # set config_id for future re-classify
+            # Set config_id for future re-classify
             i.config_id = c.id
 
             Directory.set_product(i)
 
-        # get configs after resetting
+        # Get configs after resetting
         configs = Directory.get_configs()
 
         for instance in instances:
@@ -393,13 +392,6 @@ class Directory(object):
 
         pool.close()
         pool.join()
-
-    def get_part(self, s):
-        for config in self.configs:
-            part_id, alias_id = Directory.classify(config, s)
-            if part_id:
-                return part_id
-        return None
 
     @staticmethod
     def get_configs():
