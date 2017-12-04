@@ -252,10 +252,10 @@ class Directory(object):
                 if alias.name in s and alias.anti:
                     find = False
 
-                if alias.insert or alias.delete or alias.subsitute:
+                if alias.insert or alias.delete or alias.substitute:
                     fuzzy_counts = count_fuzzy(alias.name, s)
-                    if alias.subsitute:
-                        if fuzzy_counts[0] > alias.subsitute:
+                    if alias.substitute:
+                        if fuzzy_counts[0] > alias.substitute:
                             find = False
                     if alias.insert:
                         if fuzzy_counts[1] > alias.insert:
