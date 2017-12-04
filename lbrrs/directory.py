@@ -146,20 +146,10 @@ class Directory(object):
             session.expunge_all()
 
     @staticmethod
-    def get_configs():
-        with session_scope() as session:
-            configs = session.query(Config).options(
-                subqueryload(Config.parts).subqueryload(Part.aliases)
-            ).all()
-            session.expunge_all()
-            return configs
-
-    @staticmethod
-    def get_units():
-        with session_scope() as session:
-            units = session.query(Unit).order_by(Unit.level.desc()).all()
-            session.expunge_all()
-            return units
+    def flat_xpath(page, s):
+        s = ''.join(page.xpath(s)).strip()
+        s = Directory.normalize(s)
+        return s
 
     @staticmethod
     def normalize(s):
@@ -185,27 +175,6 @@ class Directory(object):
 
         return s.lower()
 
-    @staticmethod
-    def get_origin(origin_str, default='其他'):
-
-        origin_str = Directory.normalize(origin_str)
-
-        def find(s):
-            for key in Directory.ORIGIN_MAP.keys():
-                if key in s:
-                    return Directory.ORIGIN_MAP[key]
-            return ''
-
-        with session_scope() as session:
-            value = find(origin_str)
-            if value:
-                origin = session.query(Origin).filter(Origin.name == value).first()
-            else:
-                origin = session.query(Origin).filter(Origin.name == default).first()
-            session.expunge(origin)
-
-        return origin
-
     def get_unit(self, unit_str):
 
         for unit in self.units:
@@ -222,41 +191,20 @@ class Directory(object):
             pc.product = pd
             Directory.set_price(pc)
 
-#        manuals = []
+#       manuals = []
 
         for config, product, price in cls.STACK:
             product = Directory.classify_product_auto(config, product)
-#            if product.part_id:
+#           if product.part_id:
             set_product_price(product, price)
-#            else:
-#                manuals.append((config, product, price))
+#           else:
+#               manuals.append((config, product, price))
 
-#        for config, product, price in manuals:
-#            product = Directory.classify_product_manual(config, product)
-#            set_product_price(product, price)
+#       for config, product, price in manuals:
+#           product = Directory.classify_product_manual(config, product)
+#           set_product_price(product, price)
 
         cls.STACK = []
-
-    @staticmethod
-    def set_product(product):
-
-        with session_scope() as session:
-            db_product = session.query(Product).filter(
-                Product.market_id == product.market_id
-            ).filter(
-                Product.pid == product.pid
-            ).first()
-
-            if db_product:
-                db_product.config_id = product.config_id
-                db_product.name = product.name
-                db_product.part_id = product.part_id
-                db_product.alias_id = product.alias_id
-                db_product.weight = product.weight
-                db_product.count = product.count
-                db_product.unit_id = product.unit_id
-            else:
-                session.add(product)
 
     @classmethod
     def get_count(cls, count_str):
@@ -388,6 +336,114 @@ class Directory(object):
         return product
 
     @staticmethod
+    def re_classify(instances):
+
+        cpu = cpu_count()
+        pool = _ThreadPool(cpu)
+
+        def classify_recipe_part(c, i):
+
+            part_id, alias_id = Directory.classify(c, i.name)
+
+            if part_id:
+                i.part_id = part_id
+
+                Directory.set_recipe_part(i)
+
+        def classify_product(c, i):
+
+            i = Directory.classify_product_auto(c, i)
+
+            # set config_id for future re-classify
+            i.config_id = c.id
+
+            Directory.set_product(i)
+
+        # get configs after resetting
+        configs = Directory.get_configs()
+
+        for instance in instances:
+
+            if isinstance(instance, Product):
+
+                config_name = instance.config.name
+
+                for config in configs:
+
+                    if config.name == config_name:
+
+                        pool.apply_async(classify_product, args=(config, instance))
+
+            if isinstance(instance, Recipe_Part):
+
+                for config in configs:
+
+                    pool.apply_async(classify_recipe_part, args=(config, instance))
+
+        pool.close()
+        pool.join()
+
+    def get_part(self, s):
+        for config in self.configs:
+            part_id, alias_id = Directory.classify(config, s)
+            if part_id:
+                return part_id
+        return None
+
+    @staticmethod
+    def get_configs():
+        with session_scope() as session:
+            configs = session.query(Config).options(
+                subqueryload(Config.parts).subqueryload(Part.aliases)
+            ).all()
+            session.expunge_all()
+            return configs
+
+    @staticmethod
+    def get_units():
+        with session_scope() as session:
+            units = session.query(Unit).order_by(Unit.level.desc()).all()
+            session.expunge_all()
+            return units
+
+    @staticmethod
+    def get_origin(origin_str, default='其他'):
+
+        origin_str = Directory.normalize(origin_str)
+
+        def find(s):
+            for key in Directory.ORIGIN_MAP.keys():
+                if key in s:
+                    return Directory.ORIGIN_MAP[key]
+            return ''
+
+        with session_scope() as session:
+            value = find(origin_str)
+            if value:
+                origin = session.query(Origin).filter(Origin.name == value).first()
+            else:
+                origin = session.query(Origin).filter(Origin.name == default).first()
+            session.expunge(origin)
+
+        return origin
+
+    @staticmethod
+    def get_products():
+        with session_scope() as session:
+            products = session.query(Product).options(
+                subqueryload(Product.config)
+            ).all()
+            session.expunge_all()
+            return products
+
+    @staticmethod
+    def get_recipe_parts():
+        with session_scope() as session:
+            recipe_parts = session.query(Recipe_Part).all()
+            session.expunge_all()
+            return recipe_parts
+
+    @staticmethod
     def check_product(product):
         with session_scope() as session:
             db_product = session.query(Product).filter(
@@ -400,34 +456,6 @@ class Directory(object):
                 session.expunge(db_product)
                 return db_product
             return product
-
-    @staticmethod
-    def set_price(price):
-        with session_scope() as session:
-
-            db_price = session.query(Price).filter(
-                Price.date == price.date
-            ).filter(
-                Price.product_id == price.product.id
-            ).first()
-
-            if db_price:
-                db_price.price = price.price
-            else:
-                session.add(price)
-
-    @staticmethod
-    def flat_xpath(page, s):
-        s = ''.join(page.xpath(s)).strip()
-        s = Directory.normalize(s)
-        return s
-
-    def get_part(self, s):
-        for config in self.configs:
-            part_id, alias_id = Directory.classify(config, s)
-            if part_id:
-                return part_id
-        return None
 
     @staticmethod
     def check_author(author):
@@ -456,6 +484,42 @@ class Directory(object):
                 return db_recipe
 
             return recipe
+
+    @staticmethod
+    def set_product(product):
+
+        with session_scope() as session:
+            db_product = session.query(Product).filter(
+                Product.market_id == product.market_id
+            ).filter(
+                Product.pid == product.pid
+            ).first()
+
+            if db_product:
+                db_product.config_id = product.config_id
+                db_product.name = product.name
+                db_product.part_id = product.part_id
+                db_product.alias_id = product.alias_id
+                db_product.weight = product.weight
+                db_product.count = product.count
+                db_product.unit_id = product.unit_id
+            else:
+                session.add(product)
+
+    @staticmethod
+    def set_price(price):
+        with session_scope() as session:
+
+            db_price = session.query(Price).filter(
+                Price.date == price.date
+            ).filter(
+                Price.product_id == price.product.id
+            ).first()
+
+            if db_price:
+                db_price.price = price.price
+            else:
+                session.add(price)
 
     @staticmethod
     def set_author(author):
@@ -508,71 +572,8 @@ class Directory(object):
             else:
                 session.add(recipe_part)
 
-    '''Withdraw all products before reset configs to 
-    recognize each product belongs to which config'''
-    @staticmethod
-    def get_products():
-        with session_scope() as session:
-            products = session.query(Product).options(
-                subqueryload(Product.config)
-            ).all()
-            session.expunge_all()
-            return products
 
-    @staticmethod
-    def get_recipe_parts():
-        with session_scope() as session:
-            recipe_parts = session.query(Recipe_Part).all()
-            session.expunge_all()
-            return recipe_parts
 
-    @staticmethod
-    def re_classify(instances):
-
-        cpu = cpu_count()
-        pool = _ThreadPool(cpu)
-
-        def classify_recipe_part(c, i):
-
-            part_id, alias_id = Directory.classify(c, i.name)
-
-            if part_id:
-                i.part_id = part_id
-
-                Directory.set_recipe_part(i)
-
-        def classify_product(c, i):
-
-            i = Directory.classify_product_auto(c, i)
-
-            # set config_id for future re-classify
-            i.config_id = c.id
-
-            Directory.set_product(i)
-
-        # get configs after resetting
-        configs = Directory.get_configs()
-
-        for instance in instances:
-
-            if isinstance(instance, Product):
-
-                config_name = instance.config.name
-
-                for config in configs:
-
-                    if config.name == config_name:
-
-                        pool.apply_async(classify_product, args=(config, instance))
-
-            if isinstance(instance, Recipe_Part):
-
-                for config in configs:
-
-                    pool.apply_async(classify_recipe_part, args=(config, instance))
-
-        pool.close()
-        pool.join()
 
 
 
