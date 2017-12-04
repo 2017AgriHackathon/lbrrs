@@ -583,6 +583,7 @@ def init_parts_aliases():
             ]),
             Part(name='魚露'),
             Part(name='白米', aliases=[
+                Alias(name='米', insert=0, delete=0, subsitute=0),
                 Alias(name='白飯'),
                 Alias(name='精米'),
                 Alias(name='鮮米'),
@@ -700,8 +701,9 @@ def init_parts_aliases():
             Part(name='乾麵'),
             Part(name='刀削麵'),
             Part(name='麵條', aliases=[
+                Alias(name='麵', insert=0, delete=0, subsitute=0),
                 Alias(name='寬麵'),
-                Alias(name='細麵'),
+                Alias(name='細麵')
             ]),
             Part(name='蔬菜麵'),
             Part(name='雞蛋麵'),
@@ -848,6 +850,7 @@ def init_parts_aliases():
         chills = session.query(Config).filter(Config.name == '冷藏商品').first()
         chills.parts = [
             Part(name='鮮乳', aliases=[
+                Alias(name='牛奶', insert=0, delete=0, subsitute=0),
                 Alias(name='鮮奶'),
                 Alias(name='鮮奶油', anti=True),
                 Alias(name='乳脂', anti=True)

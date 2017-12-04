@@ -95,6 +95,10 @@ class Alias(_base):
     part = relationship('Part', back_populates='aliases')
     name = Column(Unicode(15))
     anti = Column(Boolean, default=False)
+    insert = Column(Integer)
+    delete = Column(Integer)
+    substitute = Column(Integer)
+
     products = relationship('Product')
 
 

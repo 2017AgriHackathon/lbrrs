@@ -4,6 +4,7 @@ import sys
 import datetime
 import re
 import logging
+import regex
 from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
 from pathos.pools import _ThreadPool
@@ -313,6 +314,10 @@ class Directory(object):
 
     @staticmethod
     def classify(config, s):
+
+        def count_fuzzy(to_re, to_compare):
+            return regex.fullmatch(r'(?e)('+to_re+'){e}', to_compare).fuzzy_counts
+
         find = False
         find_alias_id = None
 
@@ -324,8 +329,22 @@ class Directory(object):
                     find_alias_id = alias.id
                     find = True
             for alias in part.aliases:
+
                 if alias.name in s and alias.anti:
                     find = False
+
+                if alias.insert or alias.delete or alias.subsitute:
+                    fuzzy_counts = count_fuzzy(alias.name, s)
+                    if alias.subsitute:
+                        if fuzzy_counts[0] > alias.subsitute:
+                            find = False
+                    if alias.insert:
+                        if fuzzy_counts[1] > alias.insert:
+                            find = False
+                    if alias.delete:
+                        if fuzzy_counts[2] > alias.delelte:
+                            find = False
+
             if find:
                 log.info(Directory.INFO_MAP[4] % (s, part.name))
                 return part.id, find_alias_id
