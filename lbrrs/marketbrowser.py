@@ -52,11 +52,11 @@ class MarketBrowser(Directory):
             if not product and not price:
                 return
 
-            # set config_id for future re-classify
-            product.config_id = config.id
-
             # return self if not exists
             product = self.check_product(product)
+
+            # set config_id for future re-classify
+            product.config_id = config.id
 
             if not product.id:
                 Directory.STACK.append((config, product, price))
@@ -341,7 +341,7 @@ class GeantBrowser(MarketBrowser):
             return None, None
 
         product = Product(source=url,
-                          name=name_str,
+                          name=name,
                           origin=origin,
                           market_id=self.market.id,
                           pid=pid,
@@ -613,7 +613,7 @@ class RtmartBrowser(MarketBrowser):
             return None, None
 
         product = Product(source=url,
-                          name=name_str, origin=origin,
+                          name=name, origin=origin,
                           market_id=self.market.id,
                           pid=pid,
                           weight=weight,

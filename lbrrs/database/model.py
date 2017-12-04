@@ -24,6 +24,7 @@ class Part(_base):
     unit = relationship('Unit', back_populates='parts')
     products = relationship('Product')
     name = Column(Unicode(15))
+    weight = Column(Integer)
     aliases = relationship('Alias')
     nutritions = relationship('Nutrition')
 

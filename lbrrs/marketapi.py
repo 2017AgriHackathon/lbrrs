@@ -48,10 +48,10 @@ class MarketApi(Directory):
 
                     for product, price in results:
 
+                        product = Directory.check_product(product)
+
                         # set config_id for future re-classify
                         product.config_id = config.id
-
-                        product = Directory.check_product(product)
 
                         if not product.id:
                             Directory.STACK.append((config, product, price))
@@ -271,7 +271,7 @@ class HonestBee(MarketApi):
                 price_str = dic.get('price')
                 size_str = dic.get('size')
 
-                pid_str = dic.get('pid')
+                pid_str = dic.get('id')
 
                 pid = str(pid_str)
                 name = self.normalize(name_str)

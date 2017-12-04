@@ -218,24 +218,21 @@ class Directory(object):
 
         def set_product_price(pd, pc):
 
-            if pd.part_id:
-                pc.product = pd
-                Directory.set_price(pc)
-            else:
-                Directory.set_product(pd)
+            pc.product = pd
+            Directory.set_price(pc)
 
-        manuals = []
+#        manuals = []
 
         for config, product, price in cls.STACK:
             product = Directory.classify_product_auto(config, product)
-            if product.part_id:
-                set_product_price(product, price)
-            else:
-                manuals.append((config, product, price))
-
-        for config, product, price in manuals:
-            product = Directory.classify_product_manual(config, product)
+#            if product.part_id:
             set_product_price(product, price)
+#            else:
+#                manuals.append((config, product, price))
+
+#        for config, product, price in manuals:
+#            product = Directory.classify_product_manual(config, product)
+#            set_product_price(product, price)
 
         cls.STACK = []
 
@@ -250,6 +247,7 @@ class Directory(object):
             ).first()
 
             if db_product:
+                db_product.config_id = product.config_id
                 db_product.name = product.name
                 db_product.part_id = product.part_id
                 db_product.alias_id = product.alias_id
@@ -524,6 +522,15 @@ class Directory(object):
 
                 Directory.set_recipe_part(i)
 
+        def classify_product(c, i):
+
+            i = Directory.classify_product_auto(c, i)
+
+            # set config_id for future re-classify
+            i.config_id = c.id
+
+            Directory.set_product(i)
+
         # get configs after resetting
         configs = Directory.get_configs()
 
@@ -537,13 +544,7 @@ class Directory(object):
 
                     if config.name == config_name:
 
-                        # set config_id for future re-classify
-                        instance.config_id = config.id
-
-                        instance = Directory.classify_product_auto(config, instance)
-
-                        if instance.part_id:
-                            Directory.set_product(instance)
+                        pool.apply_async(classify_product, args=(config, instance))
 
             if isinstance(instance, Recipe_Part):
 
