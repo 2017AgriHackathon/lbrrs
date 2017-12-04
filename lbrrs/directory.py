@@ -228,14 +228,6 @@ class Directory(object):
                     except:
                         return None
 
-    def get_unit(self, unit_str):
-
-        for unit in self.units:
-            if unit.name in unit_str:
-                return unit
-
-        return None
-
     @staticmethod
     def classify(config, s):
 
@@ -393,6 +385,21 @@ class Directory(object):
         pool.close()
         pool.join()
 
+    def get_unit(self, unit_str):
+
+        for unit in self.units:
+            if unit.name in unit_str:
+                return unit
+
+        return None
+
+    @staticmethod
+    def get_units():
+        with session_scope() as session:
+            units = session.query(Unit).order_by(Unit.level.desc()).all()
+            session.expunge_all()
+            return units
+
     @staticmethod
     def get_configs():
         with session_scope() as session:
@@ -401,13 +408,6 @@ class Directory(object):
             ).all()
             session.expunge_all()
             return configs
-
-    @staticmethod
-    def get_units():
-        with session_scope() as session:
-            units = session.query(Unit).order_by(Unit.level.desc()).all()
-            session.expunge_all()
-            return units
 
     @staticmethod
     def get_origin(origin_str, default='其他'):
@@ -490,7 +490,6 @@ class Directory(object):
 
     @staticmethod
     def set_product(product):
-
         with session_scope() as session:
             db_product = session.query(Product).filter(
                 Product.market_id == product.market_id
