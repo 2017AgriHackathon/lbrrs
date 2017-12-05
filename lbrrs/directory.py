@@ -38,10 +38,11 @@ class Directory(object):
         [ａ-ｚ]
     ''', re.X)
 
-#    |
-#    [一二三四五六七八九]?
-#    十?
-#    [一二三四五六七八九]
+    NUM_REPLACE_RE = re.compile('''
+        [一二三四五六七八九]?
+        十?
+        [一二三四五六七八九]
+    ''', re.X)
 
     TO_REPLACE_MAP = {
         '台': '臺', '／': '/',
@@ -54,21 +55,20 @@ class Directory(object):
         'ｕ': 'u', 'ｖ': 'v', 'ｗ': 'w', 'ｘ': 'x', 'ｙ': 'y',
         'ｚ': 'z',
     }
-#        '一': '1', '二': '2', '三': '3', '四': '4', '五': '5',
-#        '六': '6', '七': '7', '八': '8', '九': '9',
+
+    NUM_REPLACE_MAP = {
+        '一': '1', '二': '2', '三': '3', '四': '4', '五': '5',
+        '六': '6', '七': '7', '八': '8', '九': '9',
+    }
 
     ORIGIN_MAP = {
-        '臺北': '臺灣', '臺中': '臺灣', '基隆': '臺灣', '臺南': '臺灣', '高雄': '臺灣', '新北': '臺灣',
-        '桃園': '臺灣', '嘉義': '臺灣', '新竹': '臺灣', '苗栗': '臺灣', '南投': '臺灣', '彰化': '臺灣',
-        '屏東': '臺灣', '花蓮': '臺灣', '臺東': '臺灣', '金門': '臺灣', '澎湖': '臺灣', '臺灣': '臺灣',
-        '西螺': '臺灣', '美濃': '臺灣', '雲林': '臺灣', '宜蘭': '臺灣', '履歷': '臺灣', '有機': '臺灣',
-        '埔里': '臺灣',
-        '澳洲': '澳洲',
-        '中國': '中國',
-        '美國': '美國',
-        '日本': '日本', '富士': '日本',
-        '韓國': '韓國',
-        '進口': '其他'
+        '臺北': '臺灣', '臺中': '臺灣', '基隆': '臺灣', '臺南': '臺灣', '高雄': '臺灣',
+        '桃園': '臺灣', '嘉義': '臺灣', '新竹': '臺灣', '苗栗': '臺灣', '南投': '臺灣',
+        '屏東': '臺灣', '花蓮': '臺灣', '臺東': '臺灣', '金門': '臺灣', '澎湖': '臺灣',
+        '西螺': '臺灣', '美濃': '臺灣', '雲林': '臺灣', '宜蘭': '臺灣', '履歷': '臺灣',
+        '埔里': '臺灣', '有機': '臺灣', '臺灣': '臺灣', '彰化': '臺灣', '新北': '臺灣',
+        '澳洲': '澳洲', '中國': '中國', '美國': '美國', '日本': '日本', '富士': '日本',
+        '韓國': '韓國', '進口': '其他'
     }
 
     UNIT_SET = (1000, 1, 15, 5, 240, 340, 600, 37.5, 454, 28.35, 10, 290, 0.5, 40)
@@ -153,7 +153,7 @@ class Directory(object):
         return s
 
     @staticmethod
-    def normalize(s):
+    def normalize(s, replace_num=False):
 
         def replace(m):
 
@@ -162,15 +162,24 @@ class Directory(object):
             if found in Directory.TO_REPLACE_MAP:
                 return Directory.TO_REPLACE_MAP[found]
 
-            # for '十一' to '九十九'
-#            if found[0] in Directory.CHINESE_NUMERALS_SET:
-#                len_found = len(found)
-#                if len_found == 2:
-#                    return '1' + Directory.TO_REPLACE_MAP[found[1]]
-#                if len_found == 3:
-#                    return Directory.TO_REPLACE_MAP[found[0]] + Directory.TO_REPLACE_MAP[found[2]]
+            if replace_num:
+
+                if found in Directory.NUM_REPLACE_MAP:
+                    return Directory.NUM_REPLACE_MAP[found]
+
+                # for '十一' to '九十九'
+                if found[0] in Directory.CHINESE_NUMERALS_SET:
+                    len_found = len(found)
+                    if len_found == 2:
+                        return '1' + Directory.NUM_REPLACE_MAP[found[1]]
+                    if len_found == 3:
+                        return Directory.NUM_REPLACE_MAP[found[0]] + Directory.NUM_REPLACE_MAP[found[2]]
 
             return ''
+
+        if replace_num:
+
+            s = Directory.NUM_REPLACE_RE.sub(replace, s)
 
         s = Directory.GLOBAL_REPLACE_RE.sub(replace, s)
 
