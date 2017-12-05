@@ -31,16 +31,17 @@ class Directory(object):
     ''', re.X)
 
     GLOBAL_REPLACE_RE = re.compile('''
-        [ 　台／]
+        [ 　台／\[\]()（）]
         |
         [０-９] 
         |
         [ａ-ｚ]
-        |
-        [一二三四五六七八九]?
-        十?
-        [一二三四五六七八九]
     ''', re.X)
+
+#    |
+#    [一二三四五六七八九]?
+#    十?
+#    [一二三四五六七八九]
 
     TO_REPLACE_MAP = {
         '台': '臺', '／': '/',
@@ -52,9 +53,9 @@ class Directory(object):
         'ｐ': 'p', 'ｑ': 'q', 'ｒ': 'r', 'ｓ': 's', 'ｔ': 't',
         'ｕ': 'u', 'ｖ': 'v', 'ｗ': 'w', 'ｘ': 'x', 'ｙ': 'y',
         'ｚ': 'z',
-        '一': '1', '二': '2', '三': '3', '四': '4', '五': '5',
-        '六': '6', '七': '7', '八': '8', '九': '9',
     }
+#        '一': '1', '二': '2', '三': '3', '四': '4', '五': '5',
+#        '六': '6', '七': '7', '八': '8', '九': '9',
 
     ORIGIN_MAP = {
         '臺北': '臺灣', '臺中': '臺灣', '基隆': '臺灣', '臺南': '臺灣', '高雄': '臺灣', '新北': '臺灣',
@@ -162,12 +163,12 @@ class Directory(object):
                 return Directory.TO_REPLACE_MAP[found]
 
             # for '十一' to '九十九'
-            if found[0] in Directory.CHINESE_NUMERALS_SET:
-                len_found = len(found)
-                if len_found == 2:
-                    return '1' + Directory.TO_REPLACE_MAP[found[1]]
-                if len_found == 3:
-                    return Directory.TO_REPLACE_MAP[found[0]] + Directory.TO_REPLACE_MAP[found[2]]
+#            if found[0] in Directory.CHINESE_NUMERALS_SET:
+#                len_found = len(found)
+#                if len_found == 2:
+#                    return '1' + Directory.TO_REPLACE_MAP[found[1]]
+#                if len_found == 3:
+#                    return Directory.TO_REPLACE_MAP[found[0]] + Directory.TO_REPLACE_MAP[found[2]]
 
             return ''
 
@@ -350,7 +351,7 @@ class Directory(object):
             if part_id:
                 i.part_id = part_id
 
-                Directory.set_recipe_part(i)
+                Directory.update_recipe_part_part_id(i)
 
         def classify_product(c, i):
 
@@ -359,7 +360,7 @@ class Directory(object):
             # Set config_id for future re-classify
             i.config_id = c.id
 
-            Directory.set_product(i)
+            Directory.update_product_part_id(i)
 
         # Get configs after resetting
         configs = Directory.get_configs()
@@ -447,7 +448,7 @@ class Directory(object):
             return recipe_parts
 
     @staticmethod
-    def check_product(product):
+    def get_product(product):
         with session_scope() as session:
             db_product = session.query(Product).filter(
                 Product.pid == product.pid
@@ -456,6 +457,11 @@ class Directory(object):
             ).first()
 
             if db_product:
+                db_product.config_id = product.config_id
+                db_product.name = product.name
+                db_product.weight = product.weight
+                db_product.count = product.count
+                db_product.unit_id = product.unit_id
                 session.expunge(db_product)
                 return db_product
             return product
@@ -489,7 +495,7 @@ class Directory(object):
             return recipe
 
     @staticmethod
-    def set_product(product):
+    def update_product_part_id(product):
         with session_scope() as session:
             db_product = session.query(Product).filter(
                 Product.market_id == product.market_id
@@ -498,15 +504,7 @@ class Directory(object):
             ).first()
 
             if db_product:
-                db_product.config_id = product.config_id
-                db_product.name = product.name
                 db_product.part_id = product.part_id
-                db_product.alias_id = product.alias_id
-                db_product.weight = product.weight
-                db_product.count = product.count
-                db_product.unit_id = product.unit_id
-            else:
-                session.add(product)
 
     @staticmethod
     def set_price(price):
@@ -558,7 +556,7 @@ class Directory(object):
                 session.add(recipe)
 
     @staticmethod
-    def set_recipe_part(recipe_part):
+    def update_recipe_part_part_id(recipe_part):
         with session_scope() as session:
             db_recipe_part = session.query(Recipe_Part).filter(
                 Recipe_Part.recipe_id == recipe_part.recipe_id
@@ -567,12 +565,7 @@ class Directory(object):
             ).first()
 
             if db_recipe_part:
-                db_recipe_part.weight = recipe_part.weight
-                db_recipe_part.count = recipe_part.count
-                db_recipe_part.unit_id = recipe_part.unit_id
                 db_recipe_part.part_id = recipe_part.part_id
-            else:
-                session.add(recipe_part)
 
 
 

@@ -48,15 +48,14 @@ class MarketApi(Directory):
 
                     for product, price in results:
 
-                        product = Directory.check_product(product)
+                        product = Directory.get_product(product)
 
                         # set config_id for future re-classify
                         product.config_id = config.id
 
                         if not product.id:
                             Directory.STACK.append((config, product, price))
-
-                        elif product.part_id:
+                        else:
                             price.product = product
                             Directory.set_price(price)
 
@@ -170,7 +169,7 @@ class CarrfourBrowser(MarketApi):
 
             except:
                 d = {
-                    'Name': name_str,
+                    'Name': name,
                     'ItemQtyPerPack': count_str,
                     'Price': price_str
                 }

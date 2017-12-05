@@ -53,16 +53,16 @@ class MarketBrowser(Directory):
                 return
 
             # return self if not exists
-            product = self.check_product(product)
+            product = self.get_product(product)
 
             # set config_id for future re-classify
             product.config_id = config.id
 
             if not product.id:
                 Directory.STACK.append((config, product, price))
-            elif product.part_id:
+            else:
                 price.product = product
-                self.set_price(price)
+                Directory.set_price(price)
             return
 
         cpu = cpu_count()

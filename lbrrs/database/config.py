@@ -746,7 +746,8 @@ def init_parts_aliases():
             Part(name='蠔油'),
             Part(name='醬油', aliases=[
                 Alias(name='清油'),
-                Alias(name='蔭油')
+                Alias(name='蔭油'),
+                Alias(name='水餃醬汁')
             ]),
             Part(name='和露', aliases=[
                 Alias(name='鮮美露')
@@ -848,7 +849,12 @@ def init_parts_aliases():
             Part(name='鮮味炒手'),
             Part(name='豆鼓'),
             Part(name='糖粉'),
-            Part(name='奶粉')
+            Part(name='奶粉'),
+            Part(name='可可脆片', aliases=[
+                Alias(name='可可碎片'),
+                Alias(name='巧克力脆片'),
+                Alias(name='巧克力碎片')
+            ])
         ]
 
         chills = session.query(Config).filter(Config.name == '冷藏商品').first()
@@ -964,6 +970,11 @@ def init_parts_aliases():
             Part(name='吻仔魚'),
             Part(name='黃魚'),
             Part(name='丁香魚'),
+            Part(name='香魚'),
+            Part(name='腰子貝'),
+            Part(name='沙魚'),
+            Part(name='午仔魚'),
+            Part(name='"紅鮕'),
             Part(name='牡蠣'),
             Part(name='蟳'),
             Part(name='扇貝'),
