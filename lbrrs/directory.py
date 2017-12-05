@@ -466,11 +466,11 @@ class Directory(object):
             ).first()
 
             if db_product:
-                db_product.config_id = product.config_id
                 db_product.name = product.name
                 db_product.weight = product.weight
                 db_product.count = product.count
                 db_product.unit_id = product.unit_id
+                session.commit()
                 session.expunge(db_product)
                 return db_product
             return product
