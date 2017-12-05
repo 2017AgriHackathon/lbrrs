@@ -476,20 +476,23 @@ class Directory(object):
             return product
 
     @staticmethod
-    def check_author(author):
+    def get_author(author):
         with session_scope() as session:
             db_author = session.query(Author).filter(
                 Author.name == author.name
             ).first()
 
             if db_author:
+                db_author.fans = author.fans
+                db_author.aid = author.aid
+
                 session.expunge(db_author)
                 return db_author
 
             return author
 
     @staticmethod
-    def check_recipe(recipe):
+    def get_recipe(recipe):
         with session_scope() as session:
             db_recipe = session.query(Recipe).filter(
                 Recipe.name == recipe.name
@@ -498,22 +501,18 @@ class Directory(object):
             ).first()
 
             if db_recipe:
+                db_recipe.date = recipe.date
+                db_recipe.duration = recipe.duration
+                db_recipe.favors = recipe.favors
+                db_recipe.views = recipe.views
+                db_recipe.comments = recipe.comments
+                db_recipe.trys = recipe.trys
+                db_recipe.size = recipe.size
+                db_recipe.author_id = recipe.author_id
                 session.expunge(db_recipe)
                 return db_recipe
 
             return recipe
-
-    @staticmethod
-    def update_product_part_id(product):
-        with session_scope() as session:
-            db_product = session.query(Product).filter(
-                Product.market_id == product.market_id
-            ).filter(
-                Product.pid == product.pid
-            ).first()
-
-            if db_product:
-                db_product.part_id = product.part_id
 
     @staticmethod
     def set_price(price):
@@ -531,40 +530,6 @@ class Directory(object):
                 session.add(price)
 
     @staticmethod
-    def set_author(author):
-        with session_scope() as session:
-            db_author = session.query(Author).filter(
-                Author.name == author.name
-            ).first()
-
-            if db_author:
-                db_author.fans = author.fans
-                db_author.aid = author.aid
-            else:
-                session.add(author)
-
-    @staticmethod
-    def set_recipe(recipe):
-        with session_scope() as session:
-            db_recipe = session.query(Recipe).filter(
-                Recipe.name == recipe.name
-            ).filter(
-                Recipe.url_id == recipe.url_id
-            ).first()
-
-            if db_recipe:
-                db_recipe.date = recipe.date
-                db_recipe.duration = recipe.duration
-                db_recipe.favors = recipe.favors
-                db_recipe.views = recipe.views
-                db_recipe.comments = recipe.comments
-                db_recipe.trys = recipe.trys
-                db_recipe.size = recipe.size
-                db_recipe.author_id = recipe.author_id
-            else:
-                session.add(recipe)
-
-    @staticmethod
     def update_recipe_part_part_id(recipe_part):
         with session_scope() as session:
             db_recipe_part = session.query(Recipe_Part).filter(
@@ -575,6 +540,18 @@ class Directory(object):
 
             if db_recipe_part:
                 db_recipe_part.part_id = recipe_part.part_id
+
+    @staticmethod
+    def update_product_part_id(product):
+        with session_scope() as session:
+            db_product = session.query(Product).filter(
+                Product.market_id == product.market_id
+            ).filter(
+                Product.pid == product.pid
+            ).first()
+
+            if db_product:
+                db_product.part_id = product.part_id
 
 
 
