@@ -153,17 +153,17 @@ class CarrfourBrowser(MarketApi):
                     price = float(price_str)
 
                 # get origin_str and weight_str from page
-                product_url = self.INDEX_ROUTE + origin_route
+                product_url = CarrfourBrowser.INDEX_ROUTE + origin_route
                 origin_str, weight_str, unit_str = self.get_infos(product_url)
                 origin = Directory.get_origin(origin_str, default='其他')
 
                 if weight_str:
-                    weight = self.get_weight(weight_str)
+                    weight = Directory.get_weight(weight_str)
                 # try to find weight in title
                 else:
-                    weight = self.get_weight(name_str)
+                    weight = Directory.get_weight(name_str)
 
-                unit = self.get_unit(unit_str)
+                unit = Directory.get_unit(unit_str)
 
                 count = int(count_str)
 
@@ -273,21 +273,21 @@ class HonestBee(MarketApi):
                 pid_str = dic.get('id')
 
                 pid = str(pid_str)
-                name = self.normalize(name_str)
-                weight_str = self.normalize(size_str)
+                name = Directory.normalize(name_str)
+                weight_str = Directory.normalize(size_str)
                 price = float(price_str)
 
                 # try to find unit in size key
-                count = self.get_count(size_str)
+                count = Directory.get_count(size_str)
 
                 # try to find weight in size key
-                weight = self.get_weight(weight_str)
+                weight = Directory.get_weight(weight_str)
 
                 # try to find origin in title key
-                origin = self.get_origin(name_str, default='其他')
+                origin = Directory.get_origin(name_str, default='其他')
 
                 # try to find unit in title
-                unit = self.get_unit(name_str)
+                unit = Directory.get_unit(name_str)
 
             except:
                 d = {
