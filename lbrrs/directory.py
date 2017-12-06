@@ -77,7 +77,7 @@ class Directory(object):
         (?:
             (?=\D?)(?P<kg>[0-9]+?[./][0-9]+|[0-9]+)(?=kg|公斤|公升|l)                #1000
             |
-            (?=\D?)(?P<g>[0-9]+?[./][0-9]+|[0-9]+)(?=g|公克|克|毫升|ml|cc)           #1
+            (?=\D?)(?P<g>[0-9]+?[./][0-9]+|[0-9]+)(?=g|公克|克|毫升|ml|cc|c.c|c.c.)  #1
             |
             (?=\D?)(?P<u2>[0-9]+?[./][0-9]+|[0-9]+)[大](?=匙|tbs)                    #15
             |
@@ -214,7 +214,7 @@ class Directory(object):
             n, d = s.split('/')
             return float(n) / float(d)
 
-        s = cls.normalize(s)
+        s = cls.normalize(s, replace_num=True)
 
         s = re.sub('半', '0.5', s)
         s = re.sub('數', '3', s)
@@ -466,11 +466,6 @@ class Directory(object):
             ).first()
 
             if db_product:
-                db_product.name = product.name
-                db_product.weight = product.weight
-                db_product.count = product.count
-                db_product.unit_id = product.unit_id
-                session.commit()
                 session.expunge(db_product)
                 return db_product
             return product
@@ -483,9 +478,6 @@ class Directory(object):
             ).first()
 
             if db_author:
-                db_author.fans = author.fans
-                db_author.aid = author.aid
-
                 session.expunge(db_author)
                 return db_author
 
@@ -501,14 +493,6 @@ class Directory(object):
             ).first()
 
             if db_recipe:
-                db_recipe.date = recipe.date
-                db_recipe.duration = recipe.duration
-                db_recipe.favors = recipe.favors
-                db_recipe.views = recipe.views
-                db_recipe.comments = recipe.comments
-                db_recipe.trys = recipe.trys
-                db_recipe.size = recipe.size
-                db_recipe.author_id = recipe.author_id
                 session.expunge(db_recipe)
                 return db_recipe
 
