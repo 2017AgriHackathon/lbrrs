@@ -271,11 +271,11 @@ class Directory(object):
                 else:
                     delete = True
 
-                m = substitute and insert and delete
-
-                return m
+                return substitute and insert and delete
 
             return None
+
+        name_str = Directory.normalize(name_str)
 
         find = False
         find_alias_id = None
@@ -293,10 +293,10 @@ class Directory(object):
             for alias in part.aliases:
 
                 # Classify by fuzzy counts
-                match = test_fuzzy(alias, name_str)
+                if test_fuzzy(alias, name_str):
+                    find = True
 
-                if match is not None:
-                    find = match
+            for alias in part.aliases:
 
                 # Last step: check is anti
                 if alias.name in name_str and alias.anti:
@@ -466,7 +466,7 @@ class Directory(object):
     def get_crops():
         with session_scope() as session:
             crops = session.query(Crop).all()
-            crops.expunge_all()
+            session.expunge_all()
             return crops
 
     @staticmethod
@@ -567,9 +567,7 @@ class Directory(object):
     def update_recipe_part_part_id(recipe_part):
         with session_scope() as session:
             db_recipe_part = session.query(Recipe_Part).filter(
-                Recipe_Part.recipe_id == recipe_part.recipe_id
-            ).filter(
-                Recipe_Part.name == recipe_part.name
+                Recipe_Part.id == recipe_part.id
             ).first()
 
             if db_recipe_part:
@@ -579,9 +577,7 @@ class Directory(object):
     def update_product_part_id(product):
         with session_scope() as session:
             db_product = session.query(Product).filter(
-                Product.market_id == product.market_id
-            ).filter(
-                Product.pid == product.pid
+                Product.id == product.id
             ).first()
 
             if db_product:
@@ -591,7 +587,7 @@ class Directory(object):
     def update_crop_part_id(crop):
         with session_scope() as session:
             db_crop = session.query(Crop).filter(
-                Crop.name == crop.name
+                Crop.id == crop.id
             ).first()
 
             if db_crop:
