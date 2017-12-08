@@ -28,17 +28,14 @@ def init():
 
 
 def reset_parts_aliases():
-    print('reset configs...')
+    print('reset dictionary...')
 
     with session_scope() as session:
-        # Reset foreign key from product, recipe_part, season
+        # Reset fk from product, recipe_part, season
         session.execute(update(Product, values={Product.part_id: None,
                                                 Product.alias_id: None}))
         session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
         session.execute(update(Crop, values={Crop.part_id: None}))
-
-        # Reset foreign key from part
-        session.execute(update(Part, values={Part.unit_id: None}))
 
         # Delete parts, aliases
         session.query(Alias).delete()

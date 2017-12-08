@@ -244,37 +244,6 @@ class Directory(object):
         def count_fuzzy(to_re, to_compare):
             return regex.fullmatch(r'(?e)('+to_re+'){e}', to_compare).fuzzy_counts
 
-        def test_fuzzy(a, s):
-
-            has_insert = isinstance(a.insert, int)
-
-            has_delete = isinstance(a.delete, int)
-
-            has_substitute = isinstance(a.substitute, int)
-
-            if has_insert or has_delete or has_substitute:
-
-                fuzzy_counts = count_fuzzy(a.name, s)
-
-                if has_substitute:
-                    substitute = fuzzy_counts[0] <= a.substitute
-                else:
-                    substitute = True
-
-                if has_insert:
-                    insert = fuzzy_counts[1] <= a.insert
-                else:
-                    insert = True
-
-                if has_delete:
-                    delete = fuzzy_counts[2] <= a.delete
-                else:
-                    delete = True
-
-                return substitute and insert and delete
-
-            return None
-
         name_str = Directory.normalize(name_str)
 
         find = False
@@ -286,19 +255,46 @@ class Directory(object):
                 find = True
 
             for alias in part.aliases:
-                if alias.name in name_str and not alias.anti:
+
+                has_insert = isinstance(alias.insert, int)
+
+                has_delete = isinstance(alias.delete, int)
+
+                has_substitute = isinstance(alias.substitute, int)
+
+                # Test use regex fuzzy count
+                if has_insert or has_delete or has_substitute:
+
+                    fuzzy_counts = count_fuzzy(alias.name, name_str)
+
+                    if has_substitute:
+                        substitute = fuzzy_counts[0] <= alias.substitute
+                    else:
+                        substitute = True
+
+                    if has_insert:
+                        insert = fuzzy_counts[1] <= alias.insert
+                    else:
+                        insert = True
+
+                    if has_delete:
+                        delete = fuzzy_counts[2] <= alias.delete
+                    else:
+                        delete = True
+
+                    if substitute and insert and delete:
+
+                        find = True
+
+                # Test contains
+
+                elif alias.name in name_str and not alias.anti:
                     find_alias_id = alias.id
                     find = True
 
+            # Test has any anti contains
             for alias in part.aliases:
 
-                # Classify by fuzzy counts
-                if test_fuzzy(alias, name_str):
-                    find = True
-
-            for alias in part.aliases:
-
-                # Last step: check is anti
                 if alias.name in name_str and alias.anti:
                     find = False
 
@@ -408,7 +404,7 @@ class Directory(object):
 
                 Directory.update_crop_part_id(i)
 
-        # Get configs after resetting
+        # get configs after resetting parts, aliases
         configs = Directory.get_configs()
 
         for instance in instances:

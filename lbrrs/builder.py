@@ -16,17 +16,16 @@ def build(db_path, setup, reclassify):
             return
 
         if reclassify:
-            # withdraw all product & recipe_part
+            # Withdraw all product & recipe_part & crops
             products = Directory.get_products()
             recipe_parts = Directory.get_recipe_parts()
             crops = Directory.get_crops()
-
+            # Reset parts & aliases
             config.reset_parts_aliases()
-
+            # Reclassify
             Directory.re_classify(crops)
             Directory.re_classify(products)
             Directory.re_classify(recipe_parts)
-
             return
 
         w = marketbrowser.WellcomeBrowser()
