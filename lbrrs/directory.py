@@ -11,7 +11,7 @@ from pathos.pools import _ThreadPool as Pool
 from pathos.multiprocessing import cpu_count
 from . import _logging_config_path
 from .database.config import session_scope
-from .database.model import Market, Product, Config, Origin, Price, Part, Unit, Author, Recipe, Recipe_Part
+from .database.model import Market, Product, Config, Origin, Price, Part, Unit, Author, Recipe, Recipe_Part, Crop
 
 fileConfig(_logging_config_path)
 log = logging.getLogger(__name__)
@@ -239,43 +239,71 @@ class Directory(object):
                         return None
 
     @staticmethod
-    def classify(config, s):
+    def classify(config, name_str):
 
         def count_fuzzy(to_re, to_compare):
             return regex.fullmatch(r'(?e)('+to_re+'){e}', to_compare).fuzzy_counts
+
+        def test_fuzzy(a, s):
+
+            has_insert = isinstance(a.insert, int)
+
+            has_delete = isinstance(a.delete, int)
+
+            has_substitute = isinstance(a.substitute, int)
+
+            if has_insert or has_delete or has_substitute:
+
+                fuzzy_counts = count_fuzzy(a.name, s)
+
+                if has_substitute:
+                    substitute = fuzzy_counts[0] <= a.substitute
+                else:
+                    substitute = True
+
+                if has_insert:
+                    insert = fuzzy_counts[1] <= a.insert
+                else:
+                    insert = True
+
+                if has_delete:
+                    delete = fuzzy_counts[2] <= a.delete
+                else:
+                    delete = True
+
+                m = substitute and insert and delete
+
+                return m
+
+            return None
 
         find = False
         find_alias_id = None
 
         for part in config.parts:
 
-            if part.name in s:
+            if part.name in name_str:
                 find = True
 
             for alias in part.aliases:
-                if alias.name in s and not alias.anti:
+                if alias.name in name_str and not alias.anti:
                     find_alias_id = alias.id
                     find = True
 
             for alias in part.aliases:
 
-                if alias.name in s and alias.anti:
+                # Classify by fuzzy counts
+                match = test_fuzzy(alias, name_str)
+
+                if match is not None:
+                    find = match
+
+                # Last step: check is anti
+                if alias.name in name_str and alias.anti:
                     find = False
 
-                if alias.insert or alias.delete or alias.substitute:
-                    fuzzy_counts = count_fuzzy(alias.name, s)
-                    if alias.substitute:
-                        if fuzzy_counts[0] > alias.substitute:
-                            find = False
-                    if alias.insert:
-                        if fuzzy_counts[1] > alias.insert:
-                            find = False
-                    if alias.delete:
-                        if fuzzy_counts[2] > alias.delelte:
-                            find = False
-
             if find:
-                log.info(Directory.INFO_MAP[4] % (s, part.name))
+                log.info(Directory.INFO_MAP[4] % (name_str, part.name))
                 return part.id, find_alias_id
 
         return None, None
@@ -371,6 +399,15 @@ class Directory(object):
 
             Directory.update_product_part_id(i)
 
+        def classify_crop(c, i):
+
+            part_id, alias_id = Directory.classify(c, i.name)
+
+            if part_id:
+                i.part_id = part_id
+
+                Directory.update_crop_part_id(i)
+
         # Get configs after resetting
         configs = Directory.get_configs()
 
@@ -391,6 +428,12 @@ class Directory(object):
                 for config in configs:
 
                     pool.apply_async(classify_recipe_part, args=(config, instance))
+
+            if isinstance(instance, Crop):
+
+                for config in configs:
+
+                    pool.apply_async(classify_crop, args=(config, instance))
 
         pool.close()
         pool.join()
@@ -418,6 +461,13 @@ class Directory(object):
             ).all()
             session.expunge_all()
             return configs
+
+    @staticmethod
+    def get_crops():
+        with session_scope() as session:
+            crops = session.query(Crop).all()
+            crops.expunge_all()
+            return crops
 
     @staticmethod
     def get_origin(origin_str, default='其他'):
@@ -536,6 +586,17 @@ class Directory(object):
 
             if db_product:
                 db_product.part_id = product.part_id
+
+    @staticmethod
+    def update_crop_part_id(crop):
+        with session_scope() as session:
+            db_crop = session.query(Crop).filter(
+                Crop.name == crop.name
+            ).first()
+
+            if db_crop:
+                db_crop.part_id = crop.part_id
+
 
 
 

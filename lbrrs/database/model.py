@@ -27,6 +27,7 @@ class Part(_base):
     weight = Column(Integer)
     aliases = relationship('Alias')
     nutritions = relationship('Nutrition')
+    crops = relationship('Crop')
 
     recipes = relationship('Recipe_Part', back_populates='part')
 
@@ -42,6 +43,25 @@ class Nutrition(_base):
     carbohydrate = Column(Float)
     fiber = Column(Float)
     sugar = Column(Float)
+
+
+class Crop(_base):
+    __tablename__ = 'crop'
+    id = Column(Integer, Sequence('crop_id_seq'), primary_key=True, nullable=False)
+    part_id = Column(Integer, ForeignKey('part.id'))
+    part = relationship('Part', back_populates='crops')
+    origin_id = Column(Integer, ForeignKey('origin.id'))
+    origin = relationship('Origin', back_populates='crops')
+    name = Column(Unicode(15))
+    months = relationship('Month')
+
+
+class Month(_base):
+    __tablename__ = 'month'
+    id = Column(Integer, Sequence('month_id_seq'), primary_key=True, nullable=False)
+    crop_id = Column(Integer, ForeignKey('crop.id'))
+    crop = relationship('Crop', back_populates='months')
+    month = Column(Integer)
 
 
 class Author(_base):
@@ -114,6 +134,7 @@ class Origin(_base):
     id = Column(Integer, Sequence('origin_id_seq'), primary_key=True, nullable=False)
     name = Column(Unicode(5))
     products = relationship('Product')
+    crops = relationship('Crop')
 
 
 class Unit(_base):

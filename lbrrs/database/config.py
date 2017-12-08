@@ -4,7 +4,7 @@ from __future__ import print_function
 from sqlalchemy import create_engine, update
 from contextlib import contextmanager
 from . import _base, _session
-from .model import Config, Market, Part, Origin, Alias, Unit, Product, Recipe_Part
+from .model import Config, Market, Part, Origin, Alias, Unit, Product, Recipe_Part, Crop
 
 engine = None
 
@@ -31,11 +31,12 @@ def reset_parts_aliases():
     print('reset configs...')
 
     with session_scope() as session:
-        # Reset foreign key from product, recipe_part
+        # Reset foreign key from product, recipe_part, season
         session.execute(update(Product, values={Product.config_id: None,
                                                 Product.part_id: None,
                                                 Product.alias_id: None}))
         session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
+        session.execute(update(Crop, values={Crop.part_id: None}))
 
         # Reset foreign key from part
         session.execute(update(Part, values={Part.unit_id: None}))
@@ -491,7 +492,7 @@ def init_parts_aliases():
                 Alias(name='敏豆')
             ]),
             Part(name='菜豆', aliases=[
-                Alias(name='長豇豆')
+                Alias(name='長豇豆', delete=1)
             ]),
             Part(name='甜豆'),
             Part(name='豆苗', aliases=[
@@ -508,7 +509,8 @@ def init_parts_aliases():
             Part(name='蘿美', aliases=[
                 Alias(name='蘿蔓'),
                 Alias(name='美生菜')
-            ])
+            ]),
+            Part(name='毛豆')
         ]
 
         fruit = session.query(Config).filter(Config.name == '水果').first()
@@ -537,9 +539,8 @@ def init_parts_aliases():
             Part(name='葡萄柚'),
             Part(name='楊桃'),
             Part(name='釋迦'),
-            Part(name='椪柑'),
             Part(name='甜柿', aliases=[
-                Alias(name='柿')
+                Alias(name='柿子')
             ]),
             Part(name='蓮霧'),
             Part(name='橘子', aliases=[
@@ -567,10 +568,33 @@ def init_parts_aliases():
             Part(name='芒果', aliases=[
                 Alias(name='醬', anti=True)
             ]),
-            Part(name='荔枝'),
             Part(name='櫻桃'),
             Part(name='柳橙'),
-            Part(name='楊桃')
+            Part(name='楊桃'),
+            Part(name='椪柑'),
+            Part(name='桶柑'),
+            Part(name='海梨柑'),
+            Part(name='金柑'),
+            Part(name='枇杷'),
+            Part(name='椰子'),
+            Part(name='青梅'),
+            Part(name='甜蜜桃'),
+            Part(name='高接梨'),
+            Part(name='水蜜桃'),
+            Part(name='荔枝', aliases=[
+                Alias(name='番', anti=True)
+            ]),
+            Part(name='番荔枝'),
+            Part(name='李子', aliases=[
+                Alias(name='李', insert=0, delete=0, substitute=0),
+
+            ]),
+            Part(name='酪梨'),
+            Part(name='龍眼'),
+            Part(name='檸檬'),
+            Part(name='溫帶梨'),
+            Part(name='文旦柚'),
+            Part(name='葡萄柚')
         ]
 
         normal = session.query(Config).filter(Config.name == '常溫商品').first()
@@ -584,7 +608,7 @@ def init_parts_aliases():
             ]),
             Part(name='魚露'),
             Part(name='白米', aliases=[
-                Alias(name='米', insert=0, delete=0, subsitute=0),
+                Alias(name='米', insert=0, delete=0, substitute=0),
                 Alias(name='白飯'),
                 Alias(name='精米'),
                 Alias(name='鮮米'),
@@ -705,7 +729,7 @@ def init_parts_aliases():
             Part(name='乾麵'),
             Part(name='刀削麵'),
             Part(name='麵條', aliases=[
-                Alias(name='麵', insert=0, delete=0, subsitute=0),
+                Alias(name='麵', insert=0, delete=0, substitute=0),
                 Alias(name='寬麵'),
                 Alias(name='細麵')
             ]),
@@ -860,7 +884,7 @@ def init_parts_aliases():
         chills = session.query(Config).filter(Config.name == '冷藏商品').first()
         chills.parts = [
             Part(name='鮮乳', aliases=[
-                Alias(name='牛奶', insert=0, delete=0, subsitute=0),
+                Alias(name='牛奶', insert=0, delete=0, substitute=0),
                 Alias(name='鮮奶'),
                 Alias(name='鮮奶油', anti=True),
                 Alias(name='乳脂', anti=True)
