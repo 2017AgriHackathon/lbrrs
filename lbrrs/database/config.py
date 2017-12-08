@@ -32,8 +32,7 @@ def reset_parts_aliases():
 
     with session_scope() as session:
         # Reset foreign key from product, recipe_part, season
-        session.execute(update(Product, values={Product.config_id: None,
-                                                Product.part_id: None,
+        session.execute(update(Product, values={Product.part_id: None,
                                                 Product.alias_id: None}))
         session.execute(update(Recipe_Part, values={Recipe_Part.part_id: None}))
         session.execute(update(Crop, values={Crop.part_id: None}))
