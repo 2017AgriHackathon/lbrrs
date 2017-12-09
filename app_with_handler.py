@@ -75,7 +75,7 @@ if __name__ == "__main__":
     arg_parser = ArgumentParser(
         usage='Usage: python ' + __file__ + ' [--port <port>] [--help]'
     )
-    arg_parser.add_argument('-p', '--port', default=5050, help='port')
+    arg_parser.add_argument('-p', '--port', default=8888, help='port')
     arg_parser.add_argument('-d', '--debug', default=False, help='debug')
     options = arg_parser.parse_args()
     config.setup_session('postgresql+psycopg2://postgres:1qaz@WSX@104.199.238.161/lbrrs')
@@ -83,4 +83,4 @@ if __name__ == "__main__":
     d = Directory()
     print('flask setting done', file=sys.stdout)
 
-    app.run(debug=options.debug, port=options.port)
+    app.run(debug=options.debug, port=options.port, host='10.140.0.2')
