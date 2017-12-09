@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import sys
-from datetime import date, timedelta
 import re
 import logging
 import regex
+from datetime import date
 from sqlalchemy.orm import subqueryload
 from logging.config import fileConfig
 from pathos.pools import _ThreadPool as Pool
