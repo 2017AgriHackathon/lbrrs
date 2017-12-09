@@ -605,6 +605,7 @@ class Directory(object):
         command = '''
                 select * from product_price_compare_v
                 where part_id = %s
+                order by 每公斤價格
         '''
 
         if not PART_ID:
@@ -619,10 +620,75 @@ class Directory(object):
                 {
                     '市場名稱': row[1],
                     '產品名稱': row[0],
-                    '每公斤價格': row[4]
+                    '每公斤價格': row[4],
+                    '來源': row[7]
                 }
                 for row in results
             ]
 
             return results
+
+    def get_today_recipe(self, part_str):
+
+        PART_ID = None
+
+        for config in self.configs:
+
+            part_id, alias_id = Directory.classify(config, part_str)
+
+            if part_id:
+                PART_ID = part_id
+
+                break
+
+        if not PART_ID:
+            return None
+
+        with session_scope() as session:
+
+            results = []
+
+            # get all recipe_id
+
+            command = '''
+                select recipe_id from recipe_part 
+                where part_id = %s
+            '''
+
+            recipe_ids = session.execute(command % PART_ID)
+
+            command = '''
+                select * from weighted_recipe
+                where recipe_id in (%s)
+                order by ttl_weight desc
+                limit 3
+            '''
+
+            recipes = session.execute(command % ', '.join(str(row[0]) for row in recipe_ids))
+
+            command = '''
+                select * from recipe_full_mid
+                where recipe_id = %s
+            '''
+
+            for recipe in recipes:
+
+                recipe_id = recipe[1]
+
+                recipe_parts = session.execute(command % recipe_id)
+
+                results.append(
+                    {
+                        '食譜名稱': recipe[0],
+                        '食譜預估價格': recipe[2],
+                        '食材': [{
+                            '食材名稱': recipe_part[1],
+                            '預估價格': '%s / %sg' % (recipe_part[3], recipe_part[2])
+                        } for recipe_part in recipe_parts]
+                    }
+                )
+
+            return results
+
+
 
