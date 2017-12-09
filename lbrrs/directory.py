@@ -135,8 +135,6 @@ class Directory(object):
     }
 
     def __init__(self):
-        print('Directory init', file=sys.stdout)
-
         self.date = date.today().strftime('%Y-%m-%d')
         self.configs = Directory.get_configs()
         self.units = Directory.get_units()
@@ -607,6 +605,10 @@ class Directory(object):
                 select * from product_price_compare_v
                 where part_id = %s
         '''
+
+        if not PART_ID:
+
+            return None
 
         with session_scope() as session:
 
