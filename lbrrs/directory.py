@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-import datetime
+from datetime import date, timedelta
 import re
 import logging
 import regex
 from sqlalchemy.orm import subqueryload
+from sqlalchemy import func
 from logging.config import fileConfig
 from pathos.pools import _ThreadPool as Pool
 from pathos.multiprocessing import cpu_count
@@ -136,7 +137,7 @@ class Directory(object):
 
     def __init__(self):
 
-        self.date = datetime.date.today().strftime('%Y-%m-%d')
+        self.date = date.today().strftime('%Y-%m-%d')
         self.configs = Directory.get_configs()
         self.units = Directory.get_units()
         with session_scope() as session:
@@ -588,6 +589,49 @@ class Directory(object):
 
             if db_crop:
                 db_crop.part_id = crop.part_id
+
+    def get_today_price(self, part_str):
+
+        yesterday = date.today() - timedelta(1)
+        yesterday_str = yesterday.strftime('%Y-%m-%d')
+
+        with session_scope() as session:
+
+            # part = session.query(Part).filter(Part.name.like('%'+part_str+'%')).first()
+
+            # print(part.name, part.id)
+
+            price = session.query(Price).filter(
+                Price.date == yesterday_str
+            ).first()
+
+            return price.price
+
+            '''
+            results = []
+
+            for price in prices:
+
+                try:
+                    results.append(
+
+                        {
+                            'market': price.product.market.name,
+                            'name': price.product.name,
+                            'price': price.price,
+                            'weight': price.product.weight * price.product.count,
+                            'date': price.date
+                        }
+
+                    )
+                except TypeError:
+                    pass
+
+            return results      
+            '''
+
+
+
 
 
 
