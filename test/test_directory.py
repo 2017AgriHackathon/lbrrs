@@ -1,3 +1,6 @@
+
+import sys, os
+sys.path.append(os.path.abspath('..'))
 from lbrrs.directory import Directory
 from lbrrs.database import config
 

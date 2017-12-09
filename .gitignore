@@ -1,6 +1,13 @@
 #
 *.pyc
 .idea
+.DS_Store
 
 #
 /database/*.pyc
+/bin
+/include
+/lib
+/src
+pip-selfcheck.json
+pyvenv.cfg

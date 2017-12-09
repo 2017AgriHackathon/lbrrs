@@ -6,7 +6,6 @@ import re
 import logging
 import regex
 from sqlalchemy.orm import subqueryload
-from sqlalchemy import func
 from logging.config import fileConfig
 from pathos.pools import _ThreadPool as Pool
 from pathos.multiprocessing import cpu_count
@@ -34,7 +33,7 @@ class Directory(object):
     GLOBAL_REPLACE_RE = re.compile('''
         [ 　台／\[\]()（）]
         |
-        [０-９] 
+        [０-９]
         |
         [ａ-ｚ]
     ''', re.X)
@@ -102,9 +101,9 @@ class Directory(object):
             |
             (?=\D?)(?P<u12>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?=滴)                    #0.5
             |
-            (?=\D?)(?P<u13>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?=球)                    #40       
+            (?=\D?)(?P<u13>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?=球)                    #40
             |
-            (?=\D?)(?P<value>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?P<other_unit>[張尾把個片粒顆支條包袋盒瓶罐入])               
+            (?=\D?)(?P<value>[0-9]+?[./][0-9]+|[0-9]+)[小大]?(?P<other_unit>[張尾把個片粒顆支條包袋盒瓶罐入])
         )
     ''', re.X)
 
@@ -136,6 +135,7 @@ class Directory(object):
     }
 
     def __init__(self):
+        print('Directory init', file=sys.stdout)
 
         self.date = date.today().strftime('%Y-%m-%d')
         self.configs = Directory.get_configs()
@@ -621,16 +621,5 @@ class Directory(object):
                 for row in results
             ]
 
-
-
-
-
-
-
-
-
-
-
-
-
+            return results
 
