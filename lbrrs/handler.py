@@ -5,7 +5,6 @@ import logging
 from .database.config import session_scope
 from .database.model import Log
 
-
 class SQLAlchemyHandler(logging.Handler):
     def emit(self, record):
         log = Log(

@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, update
 from contextlib import contextmanager
 from . import _base, _session
 from .model import Config, Market, Part, Origin, Alias, Unit, Product, Recipe_Part, Crop
+import sys
 
 engine = None
 
@@ -16,7 +17,7 @@ def setup_session(db_path):
 
 
 def init():
-    print('initializing database...')
+    print('initializing database...', file=sys.stdout)
 #   _base.metadata.drop_all(engine)
     _base.metadata.create_all(engine)
 
@@ -1230,5 +1231,3 @@ def session_scope():
         raise
     finally:
         session.close()
-
-
