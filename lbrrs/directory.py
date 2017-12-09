@@ -592,44 +592,34 @@ class Directory(object):
 
     def get_today_price(self, part_str):
 
-        yesterday = date.today() - timedelta(1)
-        yesterday_str = yesterday.strftime('%Y-%m-%d')
+        PART_ID = None
+
+        for config in self.configs:
+
+            part_id, alias_id = Directory.classify(config, part_str)
+
+            if part_id:
+                PART_ID = part_id
+
+                break
+
+        command = '''
+                select * from product_price_compare_v
+                where part_id = %s
+        '''
 
         with session_scope() as session:
 
-            # part = session.query(Part).filter(Part.name.like('%'+part_str+'%')).first()
+            results = session.execute(command % PART_ID)
 
-            # print(part.name, part.id)
-
-            price = session.query(Price).filter(
-                Price.date == yesterday_str
-            ).first()
-
-            return price.price
-
-            '''
-            results = []
-
-            for price in prices:
-
-                try:
-                    results.append(
-
-                        {
-                            'market': price.product.market.name,
-                            'name': price.product.name,
-                            'price': price.price,
-                            'weight': price.product.weight * price.product.count,
-                            'date': price.date
-                        }
-
-                    )
-                except TypeError:
-                    pass
-
-            return results      
-            '''
-
+            return [
+                {
+                    '市場名稱': row[1],
+                    '產品名稱': row[0],
+                    '每公斤價格': row[4]
+                }
+                for row in results
+            ]
 
 
 
