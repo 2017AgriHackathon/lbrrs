@@ -681,7 +681,7 @@ class Directory(object):
                     {
                         '食譜名稱': recipe[0],
                         '食譜來源': recipe[2],
-                        '食譜預估價格': recipe[3],
+                        '食譜預估價格': recipe[3] if recipe[12] > 0.5 else None,
                         '食材': [{
                             '食材名稱': recipe_part[1],
                             '預估價格': '%s / %sg' % (recipe_part[3], recipe_part[2])
