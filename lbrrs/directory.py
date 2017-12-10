@@ -667,7 +667,7 @@ class Directory(object):
             recipe_ids = session.execute(command % PART_ID)
 
             command = '''
-                select * from weighted_recipe_v4
+                select * from test_weighted_recipe_v4
                 where recipe_id in (%s)
                 order by fn_weight desc
                 limit 3
@@ -676,7 +676,7 @@ class Directory(object):
             recipes = session.execute(command % ', '.join(str(row[0]) for row in recipe_ids))
 
             command = '''
-                select * from recipe_full_mid_v2
+                select * from test_recipe_full_mid_v2
                 where recipe_id = %s
             '''
 
