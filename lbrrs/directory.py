@@ -589,6 +589,25 @@ class Directory(object):
             if db_crop:
                 db_crop.part_id = crop.part_id
 
+    def get_part_id(self, part_str):
+
+        PART_ID = None
+
+        for config in self.configs:
+
+            part_id, alias_id = Directory.classify(config, part_str)
+
+            if part_id:
+                PART_ID = part_id
+
+                break
+
+        if not PART_ID:
+
+            return None
+
+        return PART_ID
+
     def get_today_price(self, part_str):
 
         PART_ID = self.get_part_id(part_str)
@@ -618,25 +637,6 @@ class Directory(object):
             ]
 
             return results
-
-    def get_part_id(self, part_str):
-
-        PART_ID = None
-
-        for config in self.configs:
-
-            part_id, alias_id = Directory.classify(config, part_str)
-
-            if part_id:
-                PART_ID = part_id
-
-                break
-
-        if not PART_ID:
-
-            return None
-
-        return PART_ID
 
     def get_today_recipe(self, part_str):
 
@@ -699,6 +699,26 @@ class Directory(object):
 
             return results
 
+    @staticmethod
+    def get_today_outlet():
+
+        with session_scope() as session:
+
+            command = '''
+                select * from price_50cheap_v2
+                order by 價差在平均占比 desc
+                limit 5
+            '''
+
+            results = session.execute(command)
+
+            return [
+                {
+                    '產品名稱': row[6],
+                    '降價幅度': '%s%%' % round(row[11] * 100),
+                    '來源': row[1]
+                } for row in results
+            ]
 
 
 
