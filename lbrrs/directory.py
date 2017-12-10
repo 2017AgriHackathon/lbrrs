@@ -651,23 +651,23 @@ class Directory(object):
             # get all recipe_id
 
             command = '''
-                select recipe_id from recipe_part 
+                select distinct recipe_id from recipe_part 
                 where part_id = %s
             '''
 
             recipe_ids = session.execute(command % PART_ID)
 
             command = '''
-                select * from weighted_recipe
+                select * from weighted_recipe_v4
                 where recipe_id in (%s)
-                order by ttl_weight desc
+                order by fn_weight desc
                 limit 3
             '''
 
             recipes = session.execute(command % ', '.join(str(row[0]) for row in recipe_ids))
 
             command = '''
-                select * from recipe_full_mid
+                select * from recipe_full_mid_v2
                 where recipe_id = %s
             '''
 
@@ -680,7 +680,8 @@ class Directory(object):
                 results.append(
                     {
                         '食譜名稱': recipe[0],
-                        '食譜預估價格': recipe[2],
+                        '食譜來源': recipe[2],
+                        '食譜預估價格': recipe[3],
                         '食材': [{
                             '食材名稱': recipe_part[1],
                             '預估價格': '%s / %sg' % (recipe_part[3], recipe_part[2])
