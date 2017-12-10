@@ -630,6 +630,14 @@ class Directory(object):
 
     def get_today_recipe(self, part_str):
 
+        def over_20(price):
+            try:
+                price = int(price)
+            except:
+                price = 0
+
+            return price
+
         PART_ID = None
 
         for config in self.configs:
@@ -685,11 +693,12 @@ class Directory(object):
                         '食材': [{
                             '食材名稱': recipe_part[1],
                             '預估價格': '%s / %sg' % (recipe_part[3], recipe_part[2])
-                        } for recipe_part in recipe_parts]
+                        } for recipe_part in recipe_parts if over_20(recipe_part[3]) > 20]
                     }
                 )
 
             return results
+
 
 
 
