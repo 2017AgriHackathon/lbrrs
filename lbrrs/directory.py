@@ -591,26 +591,16 @@ class Directory(object):
 
     def get_today_price(self, part_str):
 
-        PART_ID = None
+        PART_ID = self.get_part_id(part_str)
 
-        for config in self.configs:
-
-            part_id, alias_id = Directory.classify(config, part_str)
-
-            if part_id:
-                PART_ID = part_id
-
-                break
+        if not PART_ID:
+            return None
 
         command = '''
                 select * from product_price_compare_v
                 where part_id = %s
                 order by 每公斤價格
         '''
-
-        if not PART_ID:
-
-            return None
 
         with session_scope() as session:
 
@@ -629,15 +619,7 @@ class Directory(object):
 
             return results
 
-    def get_today_recipe(self, part_str):
-
-        def over_20(price):
-            try:
-                price = int(price)
-            except:
-                price = 0
-
-            return price
+    def get_part_id(self, part_str):
 
         PART_ID = None
 
@@ -649,6 +631,24 @@ class Directory(object):
                 PART_ID = part_id
 
                 break
+
+        if not PART_ID:
+
+            return None
+
+        return PART_ID
+
+    def get_today_recipe(self, part_str):
+
+        def over_20(price):
+            try:
+                price = int(price)
+            except:
+                price = 0
+
+            return price
+
+        PART_ID = self.get_part_id(part_str)
 
         if not PART_ID:
             return None
