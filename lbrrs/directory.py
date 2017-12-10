@@ -620,7 +620,8 @@ class Directory(object):
                 {
                     '市場名稱': row[1],
                     '產品名稱': row[0],
-                    '每公斤價格': row[4],
+                    '重量': row[2],
+                    '單價': row[3],
                     '來源': row[7]
                 }
                 for row in results

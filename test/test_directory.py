@@ -13,6 +13,6 @@ configs = Directory.get_configs()
 
 d = Directory()
 
-result = d.get_today_recipe('鮮奶')
+result = d.get_today_recipe('雞腿')
 
 print(result)
